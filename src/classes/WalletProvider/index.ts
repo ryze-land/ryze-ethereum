@@ -1,3 +1,5 @@
-export * from './WalletProvider'
-export * from './WalletInfo'
 export * from './constants'
+export * from './interfaces'
+
+export * from './WalletInfo'
+export * from './WalletProvider'
