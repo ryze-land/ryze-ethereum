@@ -103,7 +103,7 @@ export class WalletProvider {
 
             this.commit()
 
-            await this.connect(walletInfo.provider)
+            return this.connect(walletInfo.provider)
         }
 
         // TODO maybe switch to persisted chain and address
