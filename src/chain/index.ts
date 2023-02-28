@@ -1,8 +1,5 @@
 import { ChainInfo } from './ChainInfo'
-import {  Chain } from './chains'
-
-export * from './chains'
-export { ChainMapFactory } from './ChainMapFactory'
+import { Chain } from './chains'
 
 export const chainInfos: { [chain in Chain]: ChainInfo } = {
     [Chain.ETH]: new ChainInfo(
@@ -86,3 +83,6 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         },
     ),
 }
+
+export { ChainMapFactory } from './ChainMapFactory'
+export * from './chains'
