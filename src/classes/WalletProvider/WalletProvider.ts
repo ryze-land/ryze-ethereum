@@ -9,8 +9,7 @@ import { ExtendedExternalProvider, ExtendedWeb3Provider, IEthereumStore } from '
 import { WalletInfo } from './WalletInfo'
 
 export class WalletProvider {
-    private static readonly WALLET_LOCAL_STORAGE_KEY = 'ethereum/walletInfo'
-
+    private readonly walletStorageKey: string
     private readonly defaultChain: Chain
     private readonly availableChains: Chain[]
     private readonly store?: Store<IEthereumStore>
@@ -28,22 +27,25 @@ export class WalletProvider {
         availableChains,
         store,
         customRpcs,
+        walletStorageKey,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
         store?: Store<IEthereumStore>
         customRpcs?: { [chain in Chain]?: string }
+        walletStorageKey?: string,
     }) {
         const chainMapFactory = new ChainMapFactory(availableChains)
 
         this.defaultChain = defaultChain
         this.availableChains = availableChains
         this.store = store
+        this.walletStorageKey = walletStorageKey || 'ethereum/walletInfo'
 
         this.jsonProviders = chainMapFactory.create((chain: Chain) => new JsonRpcProvider(customRpcs?.[chain] || chainInfos[chain].rpc))
         this.batchProviders = chainMapFactory.create((chain: Chain) => new JsonRpcBatchProvider(customRpcs?.[chain] || chainInfos[chain].rpc))
         this.storage = new LocalStorage<WalletInfo | null>(
-            WalletProvider.WALLET_LOCAL_STORAGE_KEY,
+            this.walletStorageKey,
             storedValue => {
                 const json: {
                     provider: WalletApplications,
@@ -194,7 +196,7 @@ export class WalletProvider {
 
     private commit() {
         if (this.store)
-            this.store.commit(WalletProvider.WALLET_LOCAL_STORAGE_KEY, this.walletInfo)
+            this.store.commit(this.walletStorageKey, this.walletInfo)
 
         this.storage.set(this.walletInfo)
     }
