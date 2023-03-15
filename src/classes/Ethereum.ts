@@ -18,7 +18,7 @@ export class Ethereum {
         availableChains: Chain[]
         store?: Store<IEthereumStore>
         customRpcs?: { [chain in Chain]?: string }
-        walletStorageKey: string
+        walletStorageKey?: string
     }) {
         this.defaultChain = defaultChain
         this.availableChains = availableChains
