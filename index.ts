@@ -6,3 +6,5 @@ export * from './src/classes/Ethereum'
 export * from './src/classes/WalletProvider'
 
 export * from './src/helpers'
+
+// TODO add "module" entry in package.json pointing to es6 compiled code
