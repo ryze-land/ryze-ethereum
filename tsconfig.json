@@ -6,10 +6,11 @@
         "outDir": "./dist",
         "strict": true,
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "removeComments": true
     },
     "exclude": [
         "./node_modules",
-        "./dist",
+        "./dist"
     ]
 }
