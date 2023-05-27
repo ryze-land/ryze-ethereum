@@ -13,7 +13,7 @@ export class Ethereum {
     }: {
         defaultChain: Chain
         availableChains: Chain[]
-        customRpcs?: { [chain in Chain]?: string }
+        customRpcs?: { [chain in Chain]?: string | string[] }
     }) {
         this.defaultChain = defaultChain
         this.availableChains = availableChains
