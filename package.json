@@ -1,6 +1,6 @@
 {
     "name": "@ryze-blockchain/ethereum",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Helpers for interacting with EVM based blockchains",
     "main": "dist/index.js",
     "module": "dist/index.js",
