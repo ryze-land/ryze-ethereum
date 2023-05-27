@@ -3,6 +3,7 @@
     "version": "1.0.1",
     "description": "Helpers for interacting with EVM based blockchains",
     "main": "dist/index.js",
+    "module": "dist/index.js",
     "scripts": {
         "lint": "eslint --ext \".js,.ts,.vue\" --ignore-path .gitignore .",
         "deploy": "tsc && npm version patch && npm publish --access public"
