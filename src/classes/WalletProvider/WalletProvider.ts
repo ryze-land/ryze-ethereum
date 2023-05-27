@@ -1,18 +1,18 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import { JsonRpcProvider, BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
-import { Store } from 'vuex'
 import { Chain, chainInfos, ChainMapFactory, parseChain } from '../../chain'
 import { LocalStorage } from '../LocalStorage'
 import { MultiRpcProvider } from '../MultiRpcProvider'
 import { Web3Errors, WalletApplications } from './constants'
-import { IEthereumStore } from './interfaces'
 import { WalletInfo } from './WalletInfo'
+import { EventEmitter } from 'events'
 
 export class WalletProvider {
+    public readonly events = new EventEmitter()
+
     private readonly walletStorageKey: string
     private readonly defaultChain: Chain
     private readonly availableChains: Chain[]
-    private readonly store?: Store<IEthereumStore>
 
     private readonly providers: { [key in Chain]: MultiRpcProvider | JsonRpcProvider }
     private readonly storage: LocalStorage<WalletInfo | null>
@@ -24,13 +24,11 @@ export class WalletProvider {
     constructor({
         defaultChain,
         availableChains,
-        store,
         customRpcs,
         walletStorageKey,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
-        store?: Store<IEthereumStore>
         customRpcs?: { [chain in Chain]?: string | string[] }
         walletStorageKey?: string,
     }) {
@@ -38,7 +36,6 @@ export class WalletProvider {
 
         this.defaultChain = defaultChain
         this.availableChains = availableChains
-        this.store = store
         this.walletStorageKey = walletStorageKey || 'ethereum/walletInfo'
 
         this.providers = chainMapFactory.create((chain: Chain) => {
@@ -200,9 +197,7 @@ export class WalletProvider {
     }
 
     private commit() {
-        if (this.store)
-            this.store.commit(this.walletStorageKey, this.walletInfo)
-
+        this.events.emit('wallet-info', this.walletInfo)
         this.storage.set(this.walletInfo)
     }
 

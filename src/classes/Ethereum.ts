@@ -1,5 +1,4 @@
-import { WalletProvider, IEthereumStore } from './WalletProvider'
-import { Store } from 'vuex'
+import { WalletProvider } from './WalletProvider'
 import { Chain } from '../chain'
 
 export class Ethereum {
@@ -10,13 +9,11 @@ export class Ethereum {
     constructor({
         defaultChain,
         availableChains,
-        store,
         customRpcs,
         walletStorageKey,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
-        store?: Store<IEthereumStore>
         customRpcs?: { [chain in Chain]?: string }
         walletStorageKey?: string
     }) {
@@ -25,7 +22,6 @@ export class Ethereum {
         this.walletProvider = new WalletProvider({
             defaultChain,
             availableChains,
-            store,
             customRpcs,
             walletStorageKey,
         })
