@@ -21,8 +21,6 @@ export class WalletProvider {
 
     private readonly defaultChain: Chain
     private readonly availableChains: Chain[]
-
-    private readonly providers: { [key in Chain]: MultiRpcProvider | JsonRpcProvider }
     private readonly storage: LocalStorage<WalletInfo | null>
 
     private initializedEvents = false
@@ -34,31 +32,16 @@ export class WalletProvider {
      *
      * @param defaultChain - The default blockchain network to connect to.
      * @param availableChains - An array of available blockchain networks for connection.
-     * @param customRpcs - An optional object mapping chains to their respective RPC interfaces.
-     * @param walletStorageKey - An optional key for storing wallet information in local storage.
      */
     constructor({
         defaultChain,
         availableChains,
-        customRpcs,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
-        customRpcs?: { [chain in Chain]?: string | string[] }
     }) {
-        const chainMapFactory = new ChainMapFactory(availableChains)
-
         this.defaultChain = defaultChain
         this.availableChains = availableChains
-
-        this.providers = chainMapFactory.create((chain: Chain) => {
-            const chainInfo = chainInfos[chain]
-            const rpc = customRpcs?.[chain] || chainInfo.rpcList || chainInfo.rpc
-
-            return typeof rpc === 'string'
-                ? new JsonRpcProvider(rpc)
-                : new MultiRpcProvider(rpc)
-        })
 
         this.storage = new LocalStorage<WalletInfo | null>(
             'ethereum-wallet-info',
@@ -156,15 +139,6 @@ export class WalletProvider {
     public disconnect() {
         this._walletInfo = null
         this.commit()
-    }
-
-    /**
-     * Returns a provider for the specified chain.
-     *
-     * @param chain - The chain for which to get a provider.
-     */
-    public getProvider(chain: Chain) {
-        return this.providers[chain]
     }
 
     /**
