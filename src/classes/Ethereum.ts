@@ -1,7 +1,7 @@
 import { JsonRpcProvider } from 'ethers'
+import { Chain, chainInfos, ChainMapFactory } from '../chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { WalletProvider } from './WalletProvider'
-import { Chain, chainInfos, ChainMapFactory } from '../chain'
 
 export class Ethereum {
     public readonly defaultChain: Chain

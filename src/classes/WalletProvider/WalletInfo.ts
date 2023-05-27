@@ -1,5 +1,5 @@
-import { WalletApplications } from './constants'
 import { Chain } from '../../chain'
+import { WalletApplications } from './constants'
 
 export class WalletInfo {
     constructor(

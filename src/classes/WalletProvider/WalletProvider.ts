@@ -1,11 +1,10 @@
+import { EventEmitter } from 'events'
 import detectEthereumProvider from '@metamask/detect-provider'
-import { JsonRpcProvider, BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
-import { Chain, chainInfos, ChainMapFactory, parseChain } from '../../chain'
+import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
+import { Chain, parseChain } from '../../chain'
 import { LocalStorage } from '../LocalStorage'
-import { MultiRpcProvider } from '../MultiRpcProvider'
 import { Web3Errors, WalletApplications } from './constants'
 import { WalletInfo } from './WalletInfo'
-import { EventEmitter } from 'events'
 
 /**
  * WalletProvider
@@ -116,7 +115,7 @@ export class WalletProvider {
 
             this.commit()
 
-            return this.connect(walletInfo.application)
+            return await this.connect(walletInfo.application)
         }
 
         // TODO maybe switch to persisted chain and address
@@ -200,6 +199,7 @@ export class WalletProvider {
         params,
     }: {
         method: string
+
         params?: any[] | Record<string, any>
     }) {
         if (!this.ethereum)
