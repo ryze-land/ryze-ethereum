@@ -6,11 +6,6 @@ export enum Web3Errors {
     UNSUPPORTED_REQUEST = 'Requests are not supported by your wallet application',
 }
 
-export enum RpcProviderType {
-    JSON,
-    BATCH,
-}
-
 export enum WalletApplications {
     METAMASK,
 }
