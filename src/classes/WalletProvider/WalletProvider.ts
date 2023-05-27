@@ -1,11 +1,11 @@
-import { JsonRpcBatchProvider, JsonRpcProvider } from '@ethersproject/providers'
 import detectEthereumProvider from '@metamask/detect-provider'
-import { ethers } from 'ethers'
+import { JsonRpcProvider, BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
 import { Store } from 'vuex'
-import { Chain, chainInfos, ChainMapFactory } from '../../chain'
+import { Chain, chainInfos, ChainMapFactory, parseChain } from '../../chain'
 import { LocalStorage } from '../LocalStorage'
-import { RpcProviderType, Web3Errors, WalletApplications } from './constants'
-import { ExtendedExternalProvider, ExtendedWeb3Provider, IEthereumStore } from './interfaces'
+import { MultiRpcProvider } from '../MultiRpcProvider'
+import { Web3Errors, WalletApplications } from './constants'
+import { IEthereumStore } from './interfaces'
 import { WalletInfo } from './WalletInfo'
 
 export class WalletProvider {
@@ -14,12 +14,11 @@ export class WalletProvider {
     private readonly availableChains: Chain[]
     private readonly store?: Store<IEthereumStore>
 
-    private readonly jsonProviders: { [key in Chain]: JsonRpcProvider }
-    private readonly batchProviders: { [key in Chain]: JsonRpcBatchProvider }
+    private readonly providers: { [key in Chain]: MultiRpcProvider | JsonRpcProvider }
     private readonly storage: LocalStorage<WalletInfo | null>
 
     private initializedEvents = false
-    private ethereum: ExtendedWeb3Provider | null = null
+    private ethereum: BrowserProvider | null = null
     private walletInfo: WalletInfo | null = null
 
     constructor({
@@ -32,7 +31,7 @@ export class WalletProvider {
         defaultChain: Chain
         availableChains: Chain[]
         store?: Store<IEthereumStore>
-        customRpcs?: { [chain in Chain]?: string }
+        customRpcs?: { [chain in Chain]?: string | string[] }
         walletStorageKey?: string,
     }) {
         const chainMapFactory = new ChainMapFactory(availableChains)
@@ -42,8 +41,15 @@ export class WalletProvider {
         this.store = store
         this.walletStorageKey = walletStorageKey || 'ethereum/walletInfo'
 
-        this.jsonProviders = chainMapFactory.create((chain: Chain) => new JsonRpcProvider(customRpcs?.[chain] || chainInfos[chain].rpc))
-        this.batchProviders = chainMapFactory.create((chain: Chain) => new JsonRpcBatchProvider(customRpcs?.[chain] || chainInfos[chain].rpc))
+        this.providers = chainMapFactory.create((chain: Chain) => {
+            const chainInfo = chainInfos[chain]
+            const rpc = customRpcs?.[chain] || chainInfo.rpcList || chainInfo.rpc
+
+            return typeof rpc === 'string'
+                ? new JsonRpcProvider(rpc)
+                : new MultiRpcProvider(rpc)
+        })
+
         this.storage = new LocalStorage<WalletInfo | null>(
             this.walletStorageKey,
             storedValue => {
@@ -65,12 +71,12 @@ export class WalletProvider {
     }
 
     public async connect(walletApplication: WalletApplications) {
-        const provider = await detectEthereumProvider() as ExtendedExternalProvider
+        const provider = await detectEthereumProvider<Eip1193Provider>()
 
         if (!provider)
             throw new Error(Web3Errors.PROVIDER_UNAVAILABLE)
 
-        this.ethereum = new ethers.providers.Web3Provider(provider, 'any') as ExtendedWeb3Provider
+        this.ethereum = new BrowserProvider(provider)
 
         if (!this.initializedEvents) {
             this._addEventListener('accountsChanged', this._updateAddress)
@@ -120,30 +126,20 @@ export class WalletProvider {
         this.commit()
     }
 
-    public getProvider({
-        chain,
-        rpcProviderType,
-    }: {
-        chain?: Chain
-        rpcProviderType?: RpcProviderType
-    } = {}) {
-        if (!chain || !this.availableChains.includes(chain))
-            chain = this.getValidChain()
-
-        if (rpcProviderType === RpcProviderType.JSON)
-            return this.jsonProviders[chain]
-
-        return this.batchProviders[chain]
+    public getProvider(chain: Chain) {
+        return this.providers[chain]
     }
 
-    public async getSigner(requireChain = true) {
+    public async getSigner(requiredChain?: Chain): Promise<JsonRpcSigner> {
         if (!this.ethereum)
             throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
 
-        let signer
-
         try {
-            signer = this.ethereum.getSigner()
+            const signer = await this.ethereum.getSigner()
+
+            await this._validateSigner(signer, requiredChain)
+
+            return signer
         }
         catch (e) {
             if ((e as Error)?.message?.includes('unknown account'))
@@ -151,27 +147,34 @@ export class WalletProvider {
 
             throw e
         }
+    }
 
-        if (requireChain && !this.availableChains.includes(await this.getWalletChain()))
-            throw new Error(Web3Errors.UNSUPPORTED_CHAIN)
+    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: Chain) {
+        if (requiredChain) {
+            const signerChain = await this.getWalletChain()
+
+            if (signerChain !== requiredChain)
+                throw new Error(Web3Errors.UNSUPPORTED_CHAIN)
+        }
 
         if (!await signer.getAddress())
             throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
-
-        return signer
     }
 
-    public async request({ method, params }: { method: string, params?: object[] }) {
+    public async request({
+        method,
+        params,
+    }: {
+        method: string
+        params?: any[] | Record<string, any>
+    }) {
         if (!this.ethereum)
             throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
 
-        if (!this.ethereum.provider.request)
+        if (!this.ethereum.provider.send)
             throw new Error(Web3Errors.UNSUPPORTED_REQUEST)
 
-        return await this.ethereum.provider.request({
-            method,
-            params,
-        })
+        return await this.ethereum.provider.send(method, params || [])
     }
 
     private async getWalletAddress(): Promise<string> {
@@ -182,7 +185,9 @@ export class WalletProvider {
         if (!this.ethereum)
             throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
 
-        return (await this.ethereum?.getNetwork())?.chainId as Chain
+        const chain = (await this.ethereum.getNetwork()).chainId
+
+        return parseChain(chain) as Chain
     }
 
     private getValidChain() {
