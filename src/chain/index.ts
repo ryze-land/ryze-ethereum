@@ -6,81 +6,82 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         Chain.ETH,
         'Ethereum',
         false,
-        'https://rpc.ankr.com/eth',
-        'https://etherscan.io',
         {
             name: 'Ether',
             symbol: 'ETH',
         },
+        'https://etherscan.io',
+        'https://rpc.ankr.com/eth',
     ),
 
     [Chain.BNB]: new ChainInfo(
         Chain.BNB,
         'BNB Smart Chain',
         false,
-        'https://rpc.ankr.com/bsc',
-        'https://bscscan.com',
         {
             name: 'Binance Coin',
             symbol: 'BNB',
         },
+        'https://bscscan.com',
+        'https://rpc.ankr.com/bsc',
     ),
     [Chain.BNB_TESTNET]: new ChainInfo(
         Chain.BNB_TESTNET,
         'BNB Smart Chain Testnet',
         true,
-        'https://rpc.ankr.com/bsc_testnet_chapel',
-        'https://testnet.bscscan.com',
+
         {
             name: 'Binance Coin',
             symbol: 'BNB',
         },
+        'https://testnet.bscscan.com',
+        'https://rpc.ankr.com/bsc_testnet_chapel',
     ),
 
     [Chain.AVAX]: new ChainInfo(
         Chain.AVAX,
         'Avalanche',
         false,
-        'https://rpc.ankr.com/avalanche-c',
-        'https://snowtrace.io',
         {
             name: 'Avalanche',
             symbol: 'AVAX',
         },
+        'https://snowtrace.io',
+        'https://rpc.ankr.com/avalanche-c',
     ),
     [Chain.AVAX_TESTNET]: new ChainInfo(
         Chain.AVAX_TESTNET,
         'Avalanche Testnet',
         true,
-        'https://api.avax-test.network/ext/bc/C/rpc',
-        'https://testnet.snowtrace.io',
         {
             name: 'Avalanche',
             symbol: 'AVAX',
         },
+        'https://testnet.snowtrace.io',
+        'https://api.avax-test.network/ext/bc/C/rpc',
     ),
 
     [Chain.POLYGON]: new ChainInfo(
         Chain.POLYGON,
         'Avalanche Testnet',
         false,
-        'https://rpc.ankr.com/polygon',
-        'https://polygonscan.com/',
         {
             name: 'Polygon',
             symbol: 'MATIC',
         },
+        'https://polygonscan.com/',
+        'https://rpc.ankr.com/polygon',
     ),
     [Chain.POLYGON_TESTNET]: new ChainInfo(
         Chain.POLYGON_TESTNET,
         'Polygon Mumbai Testnet',
         true,
-        'https://rpc.ankr.com/polygon_mumbai',
-        'https://mumbai.polygonscan.com/',
         {
             name: 'Polygon',
             symbol: 'MATIC',
         },
+        'https://mumbai.polygonscan.com/',
+        'https://rpc.ankr.com/polygon_mumbai',
     ),
 }
 
