@@ -2,11 +2,12 @@
     "name": "@ryze-blockchain/ethereum",
     "version": "1.0.3",
     "description": "Helpers for interacting with EVM based blockchains",
-    "main": "dist/index.js",
-    "module": "dist/index.js",
+    "main": "dist/cjs/index.js",
+    "module": "dist/esm/index.js",
     "scripts": {
         "lint": "eslint --ext \".js,.ts,.vue\" --ignore-path .gitignore .",
-        "deploy": "tsc && npm version patch && npm publish --access public"
+        "build": "tsc --project tsconfig.cjs.json && tsc --project tsconfig.esm.json",
+        "deploy": "npm run build && npm version patch && npm publish --access public"
     },
     "repository": {
         "type": "git",
