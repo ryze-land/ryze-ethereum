@@ -1,3 +1,3 @@
-export * from './Chains'
-export * from './EthErrors'
-export * from './WalletApplications'
+export * from './Chain'
+export * from './EthError'
+export * from './WalletApplication'

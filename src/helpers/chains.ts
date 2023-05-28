@@ -1,5 +1,5 @@
 import { allChains } from '../assets'
-import { Chain, EthErrors } from '../enums'
+import { Chain, EthError } from '../enums'
 
 export const isChain = (chain: number, availableChains: Chain[] = allChains): chain is Chain => {
     return availableChains.includes(chain)
@@ -15,5 +15,5 @@ export const parseChain = (chain: string | number | bigint): Chain => {
     if (isChain(chain))
         return chain
 
-    throw new Error(EthErrors.UNSUPPORTED_CHAIN)
+    throw new Error(EthError.UNSUPPORTED_CHAIN)
 }

@@ -1,6 +1,6 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
-import { Chain, EthErrors, WalletApplications } from '../../enums'
+import { Chain, EthError, WalletApplication } from '../../enums'
 import { parseChain } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
@@ -36,7 +36,7 @@ export class WalletManager {
             'ethereum-wallet-info',
             storedValue => {
                 const json: {
-                    provider: WalletApplications,
+                    provider: WalletApplication,
                     chain: Chain,
                     address: string,
                     connected: boolean,
@@ -60,11 +60,11 @@ export class WalletManager {
      *
      * @returns {Promise<void>}
      */
-    public async connect(walletApplication: WalletApplications): Promise<void> {
+    public async connect(walletApplication: WalletApplication): Promise<void> {
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
         if (!provider)
-            throw new Error(EthErrors.PROVIDER_UNAVAILABLE)
+            throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
         this._nativeProvider = provider
         this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
@@ -139,7 +139,7 @@ export class WalletManager {
      */
     public async getSigner(requiredChain?: Chain): Promise<JsonRpcSigner> {
         if (!this._wrappedProvider)
-            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
 
         try {
             const signer = await this._wrappedProvider.getSigner()
@@ -150,7 +150,7 @@ export class WalletManager {
         }
         catch (e) {
             if ((e as Error)?.message?.includes('unknown account'))
-                throw new Error(EthErrors.SIGNER_UNAVAILABLE)
+                throw new Error(EthError.SIGNER_UNAVAILABLE)
 
             throw e
         }
@@ -168,11 +168,11 @@ export class WalletManager {
             const signerChain = await this.getWalletChain()
 
             if (signerChain !== requiredChain)
-                throw new Error(EthErrors.UNSUPPORTED_CHAIN)
+                throw new Error(EthError.UNSUPPORTED_CHAIN)
         }
 
         if (!await signer.getAddress())
-            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
     }
 
     /**
@@ -192,10 +192,10 @@ export class WalletManager {
         params?: any[] | Record<string, any>
     }): Promise<any> {
         if (!this._wrappedProvider)
-            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
+            throw new Error(EthError.WALLET_NOT_CONNECTED)
 
         if (!this._wrappedProvider.provider.send)
-            throw new Error(EthErrors.UNSUPPORTED_REQUEST)
+            throw new Error(EthError.UNSUPPORTED_REQUEST)
 
         return await this._wrappedProvider.provider.send(method, params || [])
     }
@@ -216,7 +216,7 @@ export class WalletManager {
      */
     private async getWalletChain(): Promise<Chain> {
         if (!this._wrappedProvider)
-            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
+            throw new Error(EthError.WALLET_NOT_CONNECTED)
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 

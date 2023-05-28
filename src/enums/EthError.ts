@@ -1,4 +1,4 @@
-export enum EthErrors {
+export enum EthError {
     UNSUPPORTED_CHAIN = 'Unsupported chain',
     PROVIDER_UNAVAILABLE = 'Provider unavailable',
     SIGNER_UNAVAILABLE = 'Signer unavailable',
