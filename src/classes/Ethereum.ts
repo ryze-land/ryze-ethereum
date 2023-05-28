@@ -1,7 +1,7 @@
 import { JsonRpcProvider } from 'ethers'
 import { Chain, chainInfos, ChainMapFactory } from '../chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
-import { WalletProvider } from './WalletProvider'
+import { OnWalletUpdate, WalletProvider } from './WalletProvider'
 
 export class Ethereum {
     public readonly defaultChain: Chain
@@ -14,15 +14,17 @@ export class Ethereum {
         defaultChain,
         availableChains,
         customRpcs,
+        onWalletUpdate,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
         customRpcs?: Partial<Record<Chain, string | string[]>>
+        onWalletUpdate?: OnWalletUpdate
     }) {
         this.defaultChain = defaultChain
         this.availableChains = availableChains
 
-        this.walletProvider = new WalletProvider({ defaultChain, availableChains })
+        this.walletProvider = new WalletProvider(defaultChain, availableChains, onWalletUpdate)
 
         this.providers = new ChainMapFactory(availableChains).create((chain: Chain) => {
             const chainInfo = chainInfos[chain]

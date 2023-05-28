@@ -1,48 +1,38 @@
-import { EventEmitter } from 'events'
 import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
 import { Chain, parseChain } from '../../chain'
 import { LocalStorage } from '../LocalStorage'
 import { Web3Errors, WalletApplications } from './constants'
+import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 import { WalletInfo } from './WalletInfo'
+
+export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
 /**
  * WalletProvider
  *
  * This class provides an interface for interacting with a web3 wallet, such as MetaMask.
- * It emits a 'wallet-info' event whenever there are changes in the wallet, such as a change in the address, chain, or a disconnect.
  */
 export class WalletProvider {
-    /**
-     * An event emitter for wallet-related events.
-     */
-    public readonly events = new EventEmitter()
-
-    private readonly defaultChain: Chain
-    private readonly availableChains: Chain[]
-    private readonly storage: LocalStorage<WalletInfo | null>
-
-    private initializedEvents = false
-    private ethereum: BrowserProvider | null = null
+    private readonly _storage: LocalStorage<WalletInfo | null>
+    private _wrappedProvider: BrowserProvider | null = null
+    private _nativeProvider: MetaMaskEthereumProvider | null = null
     private _walletInfo: WalletInfo | null = null
+    private _initializedEvents = false
 
     /**
      * Constructs a WalletProvider instance.
      *
      * @param defaultChain - The default blockchain network to connect to.
      * @param availableChains - An array of available blockchain networks for connection.
+     * @param _onWalletUpdate - Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect.
      */
-    constructor({
-        defaultChain,
-        availableChains,
-    }: {
-        defaultChain: Chain
-        availableChains: Chain[]
-    }) {
-        this.defaultChain = defaultChain
-        this.availableChains = availableChains
-
-        this.storage = new LocalStorage<WalletInfo | null>(
+    constructor(
+        public readonly defaultChain: Chain,
+        public readonly availableChains: Chain[],
+        private readonly _onWalletUpdate?: OnWalletUpdate,
+    ) {
+        this._storage = new LocalStorage<WalletInfo | null>(
             'ethereum-wallet-info',
             storedValue => {
                 const json: {
@@ -71,19 +61,19 @@ export class WalletProvider {
      * @returns {Promise<void>}
      */
     public async connect(walletApplication: WalletApplications) {
-        const provider = await detectEthereumProvider<Eip1193Provider>()
+        const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
         if (!provider)
             throw new Error(Web3Errors.PROVIDER_UNAVAILABLE)
 
-        this.ethereum = new BrowserProvider(provider)
+        this._nativeProvider = provider
+        this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
 
-        if (!this.initializedEvents) {
+        if (!this._initializedEvents) {
             this._addEventListener('accountsChanged', this._updateAddress)
             this._addEventListener('chainChanged', this._updateChain)
-            // TODO handle disconnect event
 
-            this.initializedEvents = true
+            this._initializedEvents = true
         }
 
         this._walletInfo = new WalletInfo(
@@ -103,7 +93,7 @@ export class WalletProvider {
         if (this._walletInfo)
             return
 
-        const walletInfo = this.storage.get()
+        const walletInfo = this._storage.get()
 
         if (walletInfo) {
             this._walletInfo = new WalletInfo(
@@ -129,7 +119,7 @@ export class WalletProvider {
      * @returns {WalletInfo}
      */
     public get walletInfo() {
-        return this._walletInfo || this.storage.get()
+        return this._walletInfo || this._storage.get()
     }
 
     /**
@@ -148,11 +138,11 @@ export class WalletProvider {
      * @returns {Promise<JsonRpcSigner>} - Returns a promise that resolves to the JsonRpcSigner.
      */
     public async getSigner(requiredChain?: Chain): Promise<JsonRpcSigner> {
-        if (!this.ethereum)
+        if (!this._wrappedProvider)
             throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
 
         try {
-            const signer = await this.ethereum.getSigner()
+            const signer = await this._wrappedProvider.getSigner()
 
             await this._validateSigner(signer, requiredChain)
 
@@ -202,13 +192,13 @@ export class WalletProvider {
 
         params?: any[] | Record<string, any>
     }) {
-        if (!this.ethereum)
+        if (!this._wrappedProvider)
             throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
 
-        if (!this.ethereum.provider.send)
+        if (!this._wrappedProvider.provider.send)
             throw new Error(Web3Errors.UNSUPPORTED_REQUEST)
 
-        return await this.ethereum.provider.send(method, params || [])
+        return await this._wrappedProvider.provider.send(method, params || [])
     }
 
     /**
@@ -226,10 +216,10 @@ export class WalletProvider {
      * @returns {Promise<number>} - Returns a promise that resolves to the current chainId.
      */
     private async getWalletChain(): Promise<Chain> {
-        if (!this.ethereum)
+        if (!this._wrappedProvider)
             throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
 
-        const chain = (await this.ethereum.getNetwork()).chainId
+        const chain = (await this._wrappedProvider.getNetwork()).chainId
 
         return parseChain(chain) as Chain
     }
@@ -257,8 +247,8 @@ export class WalletProvider {
      * This function emits a 'wallet-info' event with the current wallet info and stores the wallet info in the storage.
      */
     private commit() {
-        this.events.emit('wallet-info', this._walletInfo)
-        this.storage.set(this._walletInfo)
+        this._onWalletUpdate?.(this._walletInfo)
+        this._storage.set(this._walletInfo)
     }
 
     /**
@@ -310,6 +300,6 @@ export class WalletProvider {
      * @param {Function} callback - The function to be called when the event is emitted.
      */
     private _addEventListener(event: string, callback: () => void) {
-        this.ethereum?.provider.on && this.ethereum.provider.on(event, () => callback.bind(this)())
+        this._nativeProvider?.on?.(event, () => callback.bind(this)())
     }
 }
