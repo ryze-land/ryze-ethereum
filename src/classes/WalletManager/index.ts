@@ -18,6 +18,7 @@ export class WalletManager {
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: MetaMaskEthereumProvider | null = null
     private _walletInfo: WalletInfo | null = null
+    private _currentWalletApplication: WalletApplication | null = null
     private _initializedEvents = false
 
     /**
@@ -66,12 +67,13 @@ export class WalletManager {
         if (!provider)
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
+        this._currentWalletApplication = walletApplication
         this._nativeProvider = provider
         this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
 
         if (!this._initializedEvents) {
-            this._addEventListener('accountsChanged', this._updateAddress)
-            this._addEventListener('chainChanged', this._updateChain)
+            this._addEventListener<string[]>('accountsChanged', this._updateAddress)
+            this._addEventListener<string>('chainChanged', this._updateChain)
 
             this._initializedEvents = true
         }
@@ -255,16 +257,23 @@ export class WalletManager {
      *
      * This function is called when the 'accountsChanged' event is emitted from the provider. It updates the address property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private async _updateAddress(): Promise<void> {
-        if (!this._walletInfo)
-            return
+    private async _updateAddress(addresses: string[]): Promise<void> {
+        const address = addresses[0]
+        const walletApplication = this._walletInfo?.application || this._currentWalletApplication
 
-        this._walletInfo = new WalletInfo(
-            this._walletInfo.application,
-            this._walletInfo.chain,
-            await this.getWalletAddress(),
-            true,
-        )
+        if (address && walletApplication) {
+            const chain = this._walletInfo?.chain || await this.getWalletChain()
+
+            this._walletInfo = new WalletInfo(
+                walletApplication,
+                chain,
+                addresses[0],
+                true,
+            )
+        }
+        else {
+            this._walletInfo = null
+        }
 
         this.commit()
     }
@@ -298,7 +307,7 @@ export class WalletManager {
      * @param {string} event - The name of the event to listen for.
      * @param {Function} callback - The function to be called when the event is emitted.
      */
-    private _addEventListener(event: string, callback: () => void): void {
-        this._nativeProvider?.on?.(event, () => callback.bind(this)())
+    private _addEventListener<T>(event: string, callback: (response: T) => void) {
+        return this._nativeProvider?.on?.(event, response => callback.bind(this)(response))
     }
 }
