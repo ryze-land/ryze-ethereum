@@ -1,5 +1,4 @@
-import { Chain } from '../../chain'
-import { WalletApplications } from './constants'
+import { Chain, WalletApplications } from '../enums'
 
 export class WalletInfo {
     constructor(

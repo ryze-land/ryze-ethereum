@@ -1,9 +1,4 @@
-export * from './src/chain'
-
-export * from './src/classes/CircularArray'
-export * from './src/classes/Ethereum'
-export * from './src/classes/LocalStorage'
-export * from './src/classes/MultiRpcProvider'
-export * from './src/classes/WalletProvider'
-
+export * from './src/assets'
+export * from './src/classes'
+export * from './src/enums'
 export * from './src/helpers'

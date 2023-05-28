@@ -1,10 +1,10 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
-import { Chain, parseChain } from '../../chain'
+import { Chain, EthErrors, WalletApplications } from '../../enums'
+import { parseChain } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
-import { Web3Errors, WalletApplications } from './constants'
+import { WalletInfo } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
-import { WalletInfo } from './WalletInfo'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
@@ -13,7 +13,7 @@ export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<v
  *
  * This class provides an interface for interacting with a web3 wallet, such as MetaMask.
  */
-export class WalletProvider {
+export class WalletManager {
     private readonly _storage: LocalStorage<WalletInfo | null>
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: MetaMaskEthereumProvider | null = null
@@ -64,7 +64,7 @@ export class WalletProvider {
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
         if (!provider)
-            throw new Error(Web3Errors.PROVIDER_UNAVAILABLE)
+            throw new Error(EthErrors.PROVIDER_UNAVAILABLE)
 
         this._nativeProvider = provider
         this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
@@ -139,7 +139,7 @@ export class WalletProvider {
      */
     public async getSigner(requiredChain?: Chain): Promise<JsonRpcSigner> {
         if (!this._wrappedProvider)
-            throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
         try {
             const signer = await this._wrappedProvider.getSigner()
@@ -150,7 +150,7 @@ export class WalletProvider {
         }
         catch (e) {
             if ((e as Error)?.message?.includes('unknown account'))
-                throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
+                throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
             throw e
         }
@@ -168,11 +168,11 @@ export class WalletProvider {
             const signerChain = await this.getWalletChain()
 
             if (signerChain !== requiredChain)
-                throw new Error(Web3Errors.UNSUPPORTED_CHAIN)
+                throw new Error(EthErrors.UNSUPPORTED_CHAIN)
         }
 
         if (!await signer.getAddress())
-            throw new Error(Web3Errors.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
     }
 
     /**
@@ -192,10 +192,10 @@ export class WalletProvider {
         params?: any[] | Record<string, any>
     }): Promise<any> {
         if (!this._wrappedProvider)
-            throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
+            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
 
         if (!this._wrappedProvider.provider.send)
-            throw new Error(Web3Errors.UNSUPPORTED_REQUEST)
+            throw new Error(EthErrors.UNSUPPORTED_REQUEST)
 
         return await this._wrappedProvider.provider.send(method, params || [])
     }
@@ -216,7 +216,7 @@ export class WalletProvider {
      */
     private async getWalletChain(): Promise<Chain> {
         if (!this._wrappedProvider)
-            throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
+            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 

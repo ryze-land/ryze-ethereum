@@ -1,4 +1,4 @@
-import { Chain } from './chains'
+import { Chain } from '../enums'
 
 export class ChainInfo {
     constructor(

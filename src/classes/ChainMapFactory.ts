@@ -1,4 +1,5 @@
-import { allChains, Chain } from './chains'
+import { allChains } from '../assets'
+import { Chain } from '../enums'
 
 const emptyObjectCallback = <T>() => ({} as T)
 
