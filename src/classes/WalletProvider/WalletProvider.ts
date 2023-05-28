@@ -60,7 +60,7 @@ export class WalletProvider {
      *
      * @returns {Promise<void>}
      */
-    public async connect(walletApplication: WalletApplications) {
+    public async connect(walletApplication: WalletApplications): Promise<void> {
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
         if (!provider)
@@ -89,7 +89,7 @@ export class WalletProvider {
     /**
      * Attempts to reestablish a previously active connection.
      */
-    public async reconnect() {
+    public async reconnect(): Promise<void> {
         if (this._walletInfo)
             return
 
@@ -116,16 +116,16 @@ export class WalletProvider {
      *
      * This function returns an object containing the current address and chainId.
      *
-     * @returns {WalletInfo}
+     * @returns {WalletInfo | null}
      */
-    public get walletInfo() {
+    public get walletInfo(): WalletInfo | null {
         return this._walletInfo || this._storage.get()
     }
 
     /**
      * Disconnects the currently connected wallet, if any.
      */
-    public disconnect() {
+    public disconnect(): void {
         this._walletInfo = null
         this.commit()
     }
@@ -163,7 +163,7 @@ export class WalletProvider {
      *
      * @throws Will throw an error if the signer is null.
      */
-    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: Chain) {
+    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: Chain): Promise<void> {
         if (requiredChain) {
             const signerChain = await this.getWalletChain()
 
@@ -189,9 +189,8 @@ export class WalletProvider {
         params,
     }: {
         method: string
-
         params?: any[] | Record<string, any>
-    }) {
+    }): Promise<any> {
         if (!this._wrappedProvider)
             throw new Error(Web3Errors.WALLET_NOT_CONNECTED)
 
@@ -246,7 +245,7 @@ export class WalletProvider {
      *
      * This function emits a 'wallet-info' event with the current wallet info and stores the wallet info in the storage.
      */
-    private commit() {
+    private commit(): void {
         this._onWalletUpdate?.(this._walletInfo)
         this._storage.set(this._walletInfo)
     }
@@ -256,7 +255,7 @@ export class WalletProvider {
      *
      * This function is called when the 'accountsChanged' event is emitted from the provider. It updates the address property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private async _updateAddress() {
+    private async _updateAddress(): Promise<void> {
         if (!this._walletInfo)
             return
 
@@ -276,7 +275,7 @@ export class WalletProvider {
      * This function is called when the 'chainChanged' event is emitted from the provider.
      * It updates the chainId property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private async _updateChain() {
+    private async _updateChain(): Promise<void> {
         if (!this._walletInfo)
             return
 
@@ -299,7 +298,7 @@ export class WalletProvider {
      * @param {string} event - The name of the event to listen for.
      * @param {Function} callback - The function to be called when the event is emitted.
      */
-    private _addEventListener(event: string, callback: () => void) {
+    private _addEventListener(event: string, callback: () => void): void {
         this._nativeProvider?.on?.(event, () => callback.bind(this)())
     }
 }
