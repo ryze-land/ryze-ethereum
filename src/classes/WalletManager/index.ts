@@ -222,7 +222,7 @@ export class WalletManager {
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 
-        return parseChain(chain) as Chain
+        return parseChain(chain)
     }
 
     /**
