@@ -1,3 +1,4 @@
+import { Web3Errors } from '../classes/WalletProvider'
 import { Chain } from './chains'
 
 export class ChainInfo {
@@ -10,8 +11,13 @@ export class ChainInfo {
             symbol: string
         },
         public readonly explorer: string,
-        public readonly rpc: string,
-        public readonly rpcList?: string[],
+        public readonly rpcList: string[],
     ) {
+        if (rpcList.length === 0)
+            throw new Error(Web3Errors.INVALID_CHAIN_CONFIG)
+    }
+
+    public get rpc(): string {
+        return this.rpcList[0]
     }
 }

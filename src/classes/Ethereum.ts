@@ -7,18 +7,17 @@ export class Ethereum {
     public readonly defaultChain: Chain
     public readonly availableChains: Chain[]
     public readonly walletProvider: WalletProvider
-
-    private readonly providers: Record<Chain, MultiRpcProvider | JsonRpcProvider>
+    private readonly _providers: Record<Chain, MultiRpcProvider | JsonRpcProvider>
 
     constructor({
         defaultChain,
         availableChains,
-        customRpcs,
+        chainToRpcMap,
         onWalletUpdate,
     }: {
         defaultChain: Chain
         availableChains: Chain[]
-        customRpcs?: Partial<Record<Chain, string | string[]>>
+        chainToRpcMap?: Partial<Record<Chain, string[]>>
         onWalletUpdate?: OnWalletUpdate
     }) {
         this.defaultChain = defaultChain
@@ -26,13 +25,13 @@ export class Ethereum {
 
         this.walletProvider = new WalletProvider(defaultChain, availableChains, onWalletUpdate)
 
-        this.providers = new ChainMapFactory(availableChains).create((chain: Chain) => {
+        this._providers = new ChainMapFactory(availableChains).create((chain: Chain) => {
             const chainInfo = chainInfos[chain]
-            const rpc = customRpcs?.[chain] || chainInfo.rpcList || chainInfo.rpc
+            const rpcs = chainToRpcMap?.[chain] || chainInfo.rpcList
 
-            return typeof rpc === 'string'
-                ? new JsonRpcProvider(rpc)
-                : new MultiRpcProvider(rpc)
+            return rpcs.length === 1
+                ? new JsonRpcProvider(rpcs[0])
+                : new MultiRpcProvider(rpcs)
         })
     }
 
@@ -46,6 +45,6 @@ export class Ethereum {
      * @param chain - The chain for which to get a provider.
      */
     public getProvider(chain: Chain) {
-        return this.providers[chain]
+        return this._providers[chain]
     }
 }
