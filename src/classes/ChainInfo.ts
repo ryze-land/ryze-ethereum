@@ -1,5 +1,4 @@
-import { Web3Errors } from '../classes/WalletProvider'
-import { Chain } from './chains'
+import { Chain, EthError } from '../enums'
 
 export class ChainInfo {
     constructor(
@@ -14,7 +13,7 @@ export class ChainInfo {
         public readonly rpcList: string[],
     ) {
         if (rpcList.length === 0)
-            throw new Error(Web3Errors.INVALID_CHAIN_CONFIG)
+            throw new Error(EthError.INVALID_CHAIN_CONFIG)
     }
 
     public get rpc(): string {

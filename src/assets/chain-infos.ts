@@ -1,5 +1,5 @@
-import { ChainInfo } from './ChainInfo'
-import { Chain } from './chains'
+import { ChainInfo } from '../classes'
+import { Chain } from '../enums'
 
 export const chainInfos: { [chain in Chain]: ChainInfo } = {
     [Chain.ETH]: new ChainInfo(
@@ -84,6 +84,3 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         ['https://rpc.ankr.com/polygon_mumbai'],
     ),
 }
-
-export { ChainMapFactory } from './ChainMapFactory'
-export * from './chains'
