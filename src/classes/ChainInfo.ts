@@ -1,4 +1,4 @@
-import { Chain } from '../enums'
+import { Chain, EthError } from '../enums'
 
 export class ChainInfo {
     constructor(
@@ -10,8 +10,13 @@ export class ChainInfo {
             symbol: string
         },
         public readonly explorer: string,
-        public readonly rpc: string,
-        public readonly rpcList?: string[],
+        public readonly rpcList: string[],
     ) {
+        if (rpcList.length === 0)
+            throw new Error(EthError.INVALID_CHAIN_CONFIG)
+    }
+
+    public get rpc(): string {
+        return this.rpcList[0]
     }
 }

@@ -11,7 +11,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'ETH',
         },
         'https://etherscan.io',
-        'https://rpc.ankr.com/eth',
+        ['https://rpc.ankr.com/eth'],
     ),
 
     [Chain.BNB]: new ChainInfo(
@@ -23,7 +23,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'BNB',
         },
         'https://bscscan.com',
-        'https://rpc.ankr.com/bsc',
+        ['https://rpc.ankr.com/bsc'],
     ),
     [Chain.BNB_TESTNET]: new ChainInfo(
         Chain.BNB_TESTNET,
@@ -35,7 +35,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'BNB',
         },
         'https://testnet.bscscan.com',
-        'https://rpc.ankr.com/bsc_testnet_chapel',
+        ['https://rpc.ankr.com/bsc_testnet_chapel'],
     ),
 
     [Chain.AVAX]: new ChainInfo(
@@ -47,7 +47,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'AVAX',
         },
         'https://snowtrace.io',
-        'https://rpc.ankr.com/avalanche-c',
+        ['https://rpc.ankr.com/avalanche-c'],
     ),
     [Chain.AVAX_TESTNET]: new ChainInfo(
         Chain.AVAX_TESTNET,
@@ -58,7 +58,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'AVAX',
         },
         'https://testnet.snowtrace.io',
-        'https://api.avax-test.network/ext/bc/C/rpc',
+        ['https://api.avax-test.network/ext/bc/C/rpc'],
     ),
 
     [Chain.POLYGON]: new ChainInfo(
@@ -70,7 +70,7 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'MATIC',
         },
         'https://polygonscan.com/',
-        'https://rpc.ankr.com/polygon',
+        ['https://rpc.ankr.com/polygon'],
     ),
     [Chain.POLYGON_TESTNET]: new ChainInfo(
         Chain.POLYGON_TESTNET,
@@ -81,6 +81,6 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
             symbol: 'MATIC',
         },
         'https://mumbai.polygonscan.com/',
-        'https://rpc.ankr.com/polygon_mumbai',
+        ['https://rpc.ankr.com/polygon_mumbai'],
     ),
 }
