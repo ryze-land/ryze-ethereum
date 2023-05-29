@@ -7,8 +7,11 @@
     "sideEffects": false,
     "scripts": {
         "lint": "eslint --ext \".js,.ts,.vue\" --ignore-path .gitignore .",
-        "build": "tsc --project tsconfig.cjs.json && tsc --project tsconfig.esm.json",
-        "deploy": "npm run lint && npm run build && npm version patch && npm publish --access public"
+        "build": "npm run lint && tsc --project tsconfig.cjs.json && tsc --project tsconfig.esm.json",
+        "publish": "npm publish --access public",
+        "deploy": "npm run build && npm version patch && npm run publish",
+        "deploy:minor": "npm run build && npm version minor && npm run publish",
+        "deploy:major": "npm run build && npm version major && npm run publish"
     },
     "repository": {
         "type": "git",
