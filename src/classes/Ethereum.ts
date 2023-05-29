@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from 'ethers'
-import { Chain, chainInfos, ChainMapFactory } from '../chain'
+import { Chain, chainInfos, ChainMapFactory, parseChain } from '../chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { OnWalletUpdate, WalletProvider } from './WalletProvider'
 
@@ -35,8 +35,8 @@ export class Ethereum {
         })
     }
 
-    public validateChain(chain: Chain | number): chain is Chain {
-        return this.availableChains.includes(chain as Chain)
+    public validateChain(chain: Chain | number | string | bigint): chain is Chain {
+        return this.availableChains.includes(parseChain(chain))
     }
 
     /**
