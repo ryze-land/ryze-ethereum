@@ -38,7 +38,7 @@ export class Ethereum {
     }
 
     public validateChain(chain: Chain | number | string | bigint): chain is Chain {
-        return this.availableChains.includes(parseChain(chain))
+        return !!parseChain(chain, this.availableChains)
     }
 
     /**

@@ -72,18 +72,18 @@ export class WalletManager {
         this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
 
         if (!this._initializedEvents) {
-            this._addEventListener<string[]>('accountsChanged', this._updateAddress)
-            this._addEventListener<string>('chainChanged', this._updateChain)
+            this._addEventListener('accountsChanged', this._updateAddress)
+            this._addEventListener('chainChanged', this._updateChain)
 
             this._initializedEvents = true
         }
 
-        this._walletInfo = new WalletInfo(
-            walletApplication,
-            await this.getWalletChain(),
-            await this.getWalletAddress(),
-            true,
-        )
+        const [chain, address] = await Promise.all([
+            this.getWalletChain(),
+            this.getWalletAddress(),
+        ])
+
+        this._walletInfo = new WalletInfo(walletApplication, chain, address, true)
 
         this.commit()
     }
@@ -208,7 +208,12 @@ export class WalletManager {
      * @returns {Promise<string>} - Returns a promise that resolves to the current wallet address.
      */
     private async getWalletAddress(): Promise<string> {
-        return (await this.request({ method: 'eth_requestAccounts' }))[0].toLowerCase()
+        const accounts = await this.request({ method: 'eth_requestAccounts' })
+
+        if (!accounts.length)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
+
+        return accounts[0].toLowerCase()
     }
 
     /**
@@ -216,7 +221,7 @@ export class WalletManager {
      *
      * @returns {Promise<number>} - Returns a promise that resolves to the current chainId.
      */
-    private async getWalletChain(): Promise<Chain> {
+    private async getWalletChain(): Promise<Chain | null> {
         if (!this._wrappedProvider)
             throw new Error(EthError.WALLET_NOT_CONNECTED)
 
@@ -284,13 +289,13 @@ export class WalletManager {
      * This function is called when the 'chainChanged' event is emitted from the provider.
      * It updates the chainId property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private async _updateChain(): Promise<void> {
+    private _updateChain(chain: string): void {
         if (!this._walletInfo)
             return
 
         this._walletInfo = new WalletInfo(
             this._walletInfo.application,
-            await this.getWalletChain(),
+            parseChain(chain),
             this._walletInfo.address,
             true,
         )
