@@ -8,4 +8,22 @@ export class WalletInfo {
         public readonly connected: boolean,
     ) {
     }
+
+    public setAddress(address: string): WalletInfo {
+        return new WalletInfo(
+            this.application,
+            this.chain,
+            address,
+            this.connected,
+        )
+    }
+
+    public setChain(chain: Chain | null): WalletInfo {
+        return new WalletInfo(
+            this.application,
+            chain,
+            this.address,
+            this.connected,
+        )
+    }
 }

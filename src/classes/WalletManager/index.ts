@@ -175,16 +175,16 @@ export class WalletManager {
             })
         }
         catch (e) {
-            const errorMessage0 = (e as ProviderError).message
+            const errorMessage = (e as ProviderError).message
 
             // In case the chain is not registered in the user's wallet
             // TODO: must test with other wallet providers
-            if (errorMessage0.includes('Unrecognized chain ID'))
+            if (errorMessage.includes('Unrecognized chain ID'))
                 return await this.addChain(chain)
 
             // In case request is already pending
             // TODO: must test with other wallets than metamask
-            if (errorMessage0.includes('Request of type') && errorMessage0.includes('already pending'))
+            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
 
             throw e
@@ -214,9 +214,9 @@ export class WalletManager {
             return await this.setChain(chain)
         }
         catch (e) {
-            const errorMessage1 = (e as ProviderError).message
+            const errorMessage = (e as ProviderError).message
 
-            if (errorMessage1.includes('Request of type') && errorMessage1.includes('already pending'))
+            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
         }
     }
@@ -324,6 +324,7 @@ export class WalletManager {
      * Updates the current address.
      *
      * This function is called when the 'accountsChanged' event is emitted from the provider. It updates the address property and emits a 'wallet-info' event with the updated wallet information.
+     * When metamask unlocks this._walletInfo will be null, so we can't assume we have a walletInfo just because the address is available as an argument
      */
     private async _updateAddress(addresses: string[]): Promise<void> {
         const address = addresses[0]
@@ -356,12 +357,7 @@ export class WalletManager {
         if (!this._walletInfo)
             return
 
-        this._walletInfo = new WalletInfo(
-            this._walletInfo.application,
-            parseChain(chain),
-            this._walletInfo.address,
-            true,
-        )
+        this._walletInfo = this._walletInfo.setChain(parseChain(chain))
 
         this.commit()
     }
