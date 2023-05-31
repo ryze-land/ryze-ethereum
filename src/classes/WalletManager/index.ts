@@ -1,10 +1,11 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
+import { chainInfos } from '../../assets'
 import { Chain, EthError, WalletApplication } from '../../enums'
-import { parseChain } from '../../helpers'
+import { parseChain, numberToHex } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
-import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
+import { MetaMaskEthereumProvider, ProviderError } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
@@ -155,6 +156,68 @@ export class WalletManager {
                 throw new Error(EthError.SIGNER_UNAVAILABLE)
 
             throw e
+        }
+    }
+
+    public async setChain(chain: Chain): Promise<void> {
+        const walletInfo = this._walletInfo
+
+        if (!walletInfo?.address || !walletInfo?.connected)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
+
+        if (walletInfo?.chain === chain)
+            throw new Error(EthError.INVALID_REQUEST)
+
+        try {
+            await this.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: numberToHex(chain) }],
+            })
+        }
+        catch (e) {
+            const errorMessage0 = (e as ProviderError).message
+
+            // In case the chain is not registered in the user's wallet
+            // TODO: must test with other wallet providers
+            if (errorMessage0.includes('Unrecognized chain ID'))
+                return await this.addChain(chain)
+
+            // In case request is already pending
+            // TODO: must test with other wallets than metamask
+            if (errorMessage0.includes('Request of type') && errorMessage0.includes('already pending'))
+                throw new Error(EthError.REQUEST_ALREADY_PENDING)
+
+            throw e
+        }
+    }
+
+    public async addChain(chain: Chain): Promise<void> {
+        const chainInfo = chainInfos[chain]
+
+        try {
+            await this.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                    {
+                        chainId: numberToHex(chainInfo.id),
+                        chainName: chainInfo.name,
+                        nativeCurrency: {
+                            ...chainInfo.currency,
+                            decimals: 18,
+                        },
+                        rpcUrls: chainInfo.rpcList,
+                        blockExplorerUrls: [chainInfo.explorer],
+                    },
+                ],
+            })
+
+            return await this.setChain(chain)
+        }
+        catch (e) {
+            const errorMessage1 = (e as ProviderError).message
+
+            if (errorMessage1.includes('Request of type') && errorMessage1.includes('already pending'))
+                throw new Error(EthError.REQUEST_ALREADY_PENDING)
         }
     }
 
