@@ -290,7 +290,7 @@ export class WalletManager {
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 
-        return parseChain(chain)
+        return parseChain(chain, this.availableChains)
     }
 
     /**
@@ -357,7 +357,9 @@ export class WalletManager {
         if (!this._walletInfo)
             return
 
-        this._walletInfo = this._walletInfo.setChain(parseChain(chain))
+        this._walletInfo = this._walletInfo.setChain(
+            parseChain(chain, this.availableChains),
+        )
 
         this.commit()
     }
