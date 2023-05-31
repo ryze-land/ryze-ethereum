@@ -357,7 +357,7 @@ export class WalletManager {
         if (!this._walletInfo)
             return
 
-        this._walletInfo = this._walletInfo.setChain(
+        this._walletInfo = this._walletInfo.withChain(
             parseChain(chain, this.availableChains),
         )
 

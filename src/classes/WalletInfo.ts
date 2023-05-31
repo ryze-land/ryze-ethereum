@@ -9,7 +9,7 @@ export class WalletInfo {
     ) {
     }
 
-    public setAddress(address: string): WalletInfo {
+    public withAddress(address: string): WalletInfo {
         return new WalletInfo(
             this.application,
             this.chain,
@@ -18,7 +18,7 @@ export class WalletInfo {
         )
     }
 
-    public setChain(chain: Chain | null): WalletInfo {
+    public withChain(chain: Chain | null): WalletInfo {
         return new WalletInfo(
             this.application,
             chain,
