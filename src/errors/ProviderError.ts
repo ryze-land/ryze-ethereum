@@ -1,5 +1,3 @@
-import { ErrorCode, EthersError } from 'ethers'
-
 // https://github.com/MetaMask/rpc-errors/blob/main/src/error-constants.ts
 export const ProviderErrorCode = {
     INVALID_INPUT: -32000,
@@ -21,7 +19,7 @@ export const ProviderErrorCode = {
     MISSING_REQUESTED_CHAIN: 4902,
 } as const
 
-interface ProviderError {
+export interface ProviderError {
     code: number
     message: string
 }
@@ -31,11 +29,4 @@ export const isProviderError = (error: any): error is ProviderError => {
         typeof error.code === 'number' &&
         typeof error.message === 'string' &&
         Object.values(ProviderErrorCode).includes(error.code)
-}
-
-export const isEthersError = <T extends ErrorCode = ErrorCode>(error: any): error is EthersError<T> => {
-    return error &&
-        typeof error.code === 'string' &&
-        (error.info === undefined || typeof error.info === 'object') &&
-        (error.error === undefined || error.error instanceof Error || isProviderError(error.error))
 }

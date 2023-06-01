@@ -1,1 +1,2 @@
-export * from './is-ethers-error'
+export * from './EthersError'
+export * from './ProviderError'
