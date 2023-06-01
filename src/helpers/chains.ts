@@ -5,15 +5,27 @@ export const isChain = (chain: number, availableChains: Chain[] = allChains): ch
     return availableChains.includes(chain)
 }
 
-export const parseChain = (chain: string | number | bigint): Chain => {
+export const parseChain = (
+    chain: string | number | bigint,
+    availableChains: Chain[] = allChains,
+): Chain | null => {
     if (typeof chain === 'string')
         chain = parseInt(chain) // this will parse hex and decimals
 
     if (typeof chain === 'bigint')
         chain = Number(chain)
 
-    if (isChain(chain))
-        return chain
+    return isChain(chain, availableChains) ? chain : null
+}
 
-    throw new Error(EthError.UNSUPPORTED_CHAIN)
+export const parseChainOrFail = (
+    chain: string | number | bigint,
+    availableChains: Chain[] = allChains,
+): Chain => {
+    const parsedChain = parseChain(chain, availableChains)
+
+    if (!parsedChain)
+        throw new Error(EthError.UNSUPPORTED_CHAIN)
+
+    return parsedChain
 }

@@ -1,7 +1,8 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
+import { chainInfos } from '../../assets'
 import { Chain, EthError, WalletApplication } from '../../enums'
-import { parseChain } from '../../helpers'
+import { parseChain, numberToHex } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
@@ -18,6 +19,7 @@ export class WalletManager {
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: MetaMaskEthereumProvider | null = null
     private _walletInfo: WalletInfo | null = null
+    private _currentWalletApplication: WalletApplication | null = null
     private _initializedEvents = false
 
     /**
@@ -66,6 +68,7 @@ export class WalletManager {
         if (!provider)
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
+        this._currentWalletApplication = walletApplication
         this._nativeProvider = provider
         this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
 
@@ -76,12 +79,12 @@ export class WalletManager {
             this._initializedEvents = true
         }
 
-        this._walletInfo = new WalletInfo(
-            walletApplication,
-            await this.getWalletChain(),
-            await this.getWalletAddress(),
-            true,
-        )
+        const [chain, address] = await Promise.all([
+            this.getWalletChain(),
+            this.getWalletAddress(),
+        ])
+
+        this._walletInfo = new WalletInfo(walletApplication, chain, address, true)
 
         this.commit()
     }
@@ -149,10 +152,72 @@ export class WalletManager {
             return signer
         }
         catch (e) {
-            if ((e as Error)?.message?.includes('unknown account'))
+            if ((e as Error).message.includes('unknown account'))
                 throw new Error(EthError.SIGNER_UNAVAILABLE)
 
             throw e
+        }
+    }
+
+    public async setChain(chain: Chain): Promise<void> {
+        const walletInfo = this._walletInfo
+
+        if (!walletInfo?.address || !walletInfo?.connected)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
+
+        if (walletInfo?.chain === chain)
+            throw new Error(EthError.INVALID_REQUEST)
+
+        try {
+            await this.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: numberToHex(chain) }],
+            })
+        }
+        catch (e) {
+            const errorMessage = (e as Error).message
+
+            // In case the chain is not registered in the user's wallet
+            // TODO: must test with other wallet providers
+            if (errorMessage.includes('Unrecognized chain ID'))
+                return await this.addChain(chain)
+
+            // In case request is already pending
+            // TODO: must test with other wallets than metamask
+            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
+                throw new Error(EthError.REQUEST_ALREADY_PENDING)
+
+            throw e
+        }
+    }
+
+    public async addChain(chain: Chain): Promise<void> {
+        const chainInfo = chainInfos[chain]
+
+        try {
+            await this.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                    {
+                        chainId: numberToHex(chainInfo.id),
+                        chainName: chainInfo.name,
+                        nativeCurrency: {
+                            ...chainInfo.currency,
+                            decimals: 18,
+                        },
+                        rpcUrls: chainInfo.rpcList,
+                        blockExplorerUrls: [chainInfo.explorer],
+                    },
+                ],
+            })
+
+            return await this.setChain(chain)
+        }
+        catch (e) {
+            const errorMessage = (e as Error).message
+
+            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
+                throw new Error(EthError.REQUEST_ALREADY_PENDING)
         }
     }
 
@@ -206,7 +271,12 @@ export class WalletManager {
      * @returns {Promise<string>} - Returns a promise that resolves to the current wallet address.
      */
     private async getWalletAddress(): Promise<string> {
-        return (await this.request({ method: 'eth_requestAccounts' }))[0].toLowerCase()
+        const accounts = await this.request({ method: 'eth_requestAccounts' })
+
+        if (!accounts.length)
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
+
+        return accounts[0].toLowerCase()
     }
 
     /**
@@ -214,13 +284,13 @@ export class WalletManager {
      *
      * @returns {Promise<number>} - Returns a promise that resolves to the current chainId.
      */
-    private async getWalletChain(): Promise<Chain> {
+    private async getWalletChain(): Promise<Chain | null> {
         if (!this._wrappedProvider)
             throw new Error(EthError.WALLET_NOT_CONNECTED)
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 
-        return parseChain(chain)
+        return parseChain(chain, this.availableChains)
     }
 
     /**
@@ -254,17 +324,25 @@ export class WalletManager {
      * Updates the current address.
      *
      * This function is called when the 'accountsChanged' event is emitted from the provider. It updates the address property and emits a 'wallet-info' event with the updated wallet information.
+     * When metamask unlocks this._walletInfo will be null, so we can't assume we have a walletInfo just because the address is available as an argument
      */
-    private async _updateAddress(): Promise<void> {
-        if (!this._walletInfo)
-            return
+    private async _updateAddress(addresses: string[]): Promise<void> {
+        const address = addresses[0]
+        const walletApplication = this._walletInfo?.application || this._currentWalletApplication
 
-        this._walletInfo = new WalletInfo(
-            this._walletInfo.application,
-            this._walletInfo.chain,
-            await this.getWalletAddress(),
-            true,
-        )
+        if (address && walletApplication) {
+            const chain = this._walletInfo?.chain || await this.getWalletChain()
+
+            this._walletInfo = new WalletInfo(
+                walletApplication,
+                chain,
+                addresses[0],
+                true,
+            )
+        }
+        else {
+            this._walletInfo = null
+        }
 
         this.commit()
     }
@@ -275,15 +353,12 @@ export class WalletManager {
      * This function is called when the 'chainChanged' event is emitted from the provider.
      * It updates the chainId property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private async _updateChain(): Promise<void> {
+    private _updateChain(chain: string): void {
         if (!this._walletInfo)
             return
 
-        this._walletInfo = new WalletInfo(
-            this._walletInfo.application,
-            await this.getWalletChain(),
-            this._walletInfo.address,
-            true,
+        this._walletInfo = this._walletInfo.withChain(
+            parseChain(chain, this.availableChains),
         )
 
         this.commit()
@@ -298,7 +373,7 @@ export class WalletManager {
      * @param {string} event - The name of the event to listen for.
      * @param {Function} callback - The function to be called when the event is emitted.
      */
-    private _addEventListener(event: string, callback: () => void): void {
-        this._nativeProvider?.on?.(event, () => callback.bind(this)())
+    private _addEventListener<T>(event: string, callback: (response: T) => void) {
+        return this._nativeProvider?.on?.(event, response => callback.bind(this)(response))
     }
 }
