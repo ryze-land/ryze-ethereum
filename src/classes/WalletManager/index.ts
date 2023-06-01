@@ -2,12 +2,18 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
 import { chainInfos } from '../../assets'
 import { Chain, EthError, WalletApplication } from '../../enums'
+import { isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { parseChain, numberToHex } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
+
+// TODO: must test interactions with all added wallet providers
+// Tested wallet providers:
+// - Metamask
+// - TrustWallet
 
 /**
  * WalletProvider
@@ -175,17 +181,20 @@ export class WalletManager {
             })
         }
         catch (e) {
-            const errorMessage = (e as Error).message
+            if (isEthersError(e) && isProviderError(e.error)) {
+                const code = e.error.code
 
-            // In case the chain is not registered in the user's wallet
-            // TODO: must test with other wallet providers
-            if (errorMessage.includes('Unrecognized chain ID'))
-                return await this.addChain(chain)
+                // In case the chain is not registered in the user's wallet
+                if (
+                    code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
+                    code === ProviderErrorCode.INTERNAL
+                )
+                    return await this.addChain(chain)
 
-            // In case request is already pending
-            // TODO: must test with other wallets than metamask
-            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
-                throw new Error(EthError.REQUEST_ALREADY_PENDING)
+                // In case request is already pending
+                if (e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
+                    throw new Error(EthError.REQUEST_ALREADY_PENDING)
+            }
 
             throw e
         }
@@ -214,9 +223,11 @@ export class WalletManager {
             return await this.setChain(chain)
         }
         catch (e) {
-            const errorMessage = (e as Error).message
-
-            if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
+            if (
+                isEthersError(e) &&
+                isProviderError(e.error) &&
+                e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
+            )
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
         }
     }
