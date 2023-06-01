@@ -10,7 +10,6 @@
         "build": "npm run lint && rimraf dist && npm run build:cjs && npm run build:esm",
         "build:cjs": "tsc --project tsconfig.cjs.json",
         "build:esm": "tsc --project tsconfig.esm.json",
-        "publish": "npm publish --access public",
         "deploy": "npm run build && npm version patch && npm run publish",
         "deploy:minor": "npm run build && npm version minor && npm run publish",
         "deploy:major": "npm run build && npm version major && npm run publish"
