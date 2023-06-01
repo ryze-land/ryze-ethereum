@@ -5,7 +5,7 @@ import { Chain, EthError, WalletApplication } from '../../enums'
 import { parseChain, numberToHex } from '../../helpers'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
-import { MetaMaskEthereumProvider, ProviderError } from './MetamaskEthereumProvider'
+import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
@@ -152,7 +152,7 @@ export class WalletManager {
             return signer
         }
         catch (e) {
-            if ((e as Error)?.message?.includes('unknown account'))
+            if ((e as Error).message.includes('unknown account'))
                 throw new Error(EthError.SIGNER_UNAVAILABLE)
 
             throw e
@@ -175,7 +175,7 @@ export class WalletManager {
             })
         }
         catch (e) {
-            const errorMessage = (e as ProviderError).message
+            const errorMessage = (e as Error).message
 
             // In case the chain is not registered in the user's wallet
             // TODO: must test with other wallet providers
@@ -214,7 +214,7 @@ export class WalletManager {
             return await this.setChain(chain)
         }
         catch (e) {
-            const errorMessage = (e as ProviderError).message
+            const errorMessage = (e as Error).message
 
             if (errorMessage.includes('Request of type') && errorMessage.includes('already pending'))
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
