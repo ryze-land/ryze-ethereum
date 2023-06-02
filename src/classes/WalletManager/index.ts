@@ -1,9 +1,10 @@
 import detectEthereumProvider from '@metamask/detect-provider'
-import { BrowserProvider, JsonRpcSigner, Eip1193Provider } from 'ethers'
-import { chainInfos } from '../../assets'
-import { Chain, EthError, WalletApplication } from '../../enums'
+import { BrowserProvider, Eip1193Provider, JsonRpcSigner } from 'ethers'
+import { chainRegistry } from '../../assets'
+import { ChainId, EthError, WalletApplication } from '../../enums'
 import { isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
-import { parseChain, numberToHex } from '../../helpers'
+import { numberToHex } from '../../helpers'
+import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
@@ -31,13 +32,13 @@ export class WalletManager {
     /**
      * Constructs a WalletProvider instance.
      *
-     * @param defaultChain - The default blockchain network to connect to.
-     * @param availableChains - An array of available blockchain networks for connection.
+     * @param defaultChainId - The default blockchain network to connect to.
+     * @param availableChainIds - An array of available blockchain networks for connection.
      * @param _onWalletUpdate - Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect.
      */
     constructor(
-        public readonly defaultChain: Chain,
-        public readonly availableChains: Chain[],
+        public readonly defaultChainId: ChainId,
+        public readonly availableChainIds: ChainId[],
         private readonly _onWalletUpdate?: OnWalletUpdate,
     ) {
         this._storage = new LocalStorage<WalletInfo | null>(
@@ -45,14 +46,14 @@ export class WalletManager {
             storedValue => {
                 const json: {
                     provider: WalletApplication,
-                    chain: Chain,
+                    chainId: ChainId,
                     address: string,
                     connected: boolean,
                 } = JSON.parse(storedValue)
 
                 return new WalletInfo(
                     json.provider,
-                    json.chain,
+                    json.chainId,
                     json.address,
                     json.connected,
                 )
@@ -80,17 +81,17 @@ export class WalletManager {
 
         if (!this._initializedEvents) {
             this._addEventListener('accountsChanged', this._updateAddress)
-            this._addEventListener('chainChanged', this._updateChain)
+            this._addEventListener('chainChanged', this._updateChainId)
 
             this._initializedEvents = true
         }
 
-        const [chain, address] = await Promise.all([
-            this.getWalletChain(),
+        const [chainId, address] = await Promise.all([
+            this.getWalletChainId(),
             this.getWalletAddress(),
         ])
 
-        this._walletInfo = new WalletInfo(walletApplication, chain, address, true)
+        this._walletInfo = new WalletInfo(walletApplication, chainId, address, true)
 
         this.commit()
     }
@@ -107,7 +108,7 @@ export class WalletManager {
         if (walletInfo) {
             this._walletInfo = new WalletInfo(
                 walletInfo.application,
-                walletInfo.chain,
+                walletInfo.chainId,
                 walletInfo.address,
                 false,
             )
@@ -146,7 +147,7 @@ export class WalletManager {
      *
      * @returns {Promise<JsonRpcSigner>} - Returns a promise that resolves to the JsonRpcSigner.
      */
-    public async getSigner(requiredChain?: Chain): Promise<JsonRpcSigner> {
+    public async getSigner(requiredChain?: ChainId): Promise<JsonRpcSigner> {
         if (!this._wrappedProvider)
             throw new Error(EthError.SIGNER_UNAVAILABLE)
 
@@ -165,19 +166,19 @@ export class WalletManager {
         }
     }
 
-    public async setChain(chain: Chain): Promise<void> {
+    public async setChain(chainId: ChainId): Promise<void> {
         const walletInfo = this._walletInfo
 
         if (!walletInfo?.address || !walletInfo?.connected)
             throw new Error(EthError.SIGNER_UNAVAILABLE)
 
-        if (walletInfo?.chain === chain)
+        if (walletInfo?.chainId === chainId)
             throw new Error(EthError.INVALID_REQUEST)
 
         try {
             await this.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: numberToHex(chain) }],
+                params: [{ chainId: numberToHex(chainId) }],
             })
         }
         catch (e) {
@@ -189,7 +190,7 @@ export class WalletManager {
                     code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
                     code === ProviderErrorCode.INTERNAL
                 )
-                    return await this.addChain(chain)
+                    return await this.addChain(chainId)
 
                 // In case request is already pending
                 if (e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
@@ -200,8 +201,8 @@ export class WalletManager {
         }
     }
 
-    public async addChain(chain: Chain): Promise<void> {
-        const chainInfo = chainInfos[chain]
+    public async addChain(chainId: ChainId): Promise<void> {
+        const chainInfo = chainRegistry[chainId]
 
         try {
             await this.request({
@@ -220,7 +221,7 @@ export class WalletManager {
                 ],
             })
 
-            return await this.setChain(chain)
+            return await this.setChain(chainId)
         }
         catch (e) {
             if (
@@ -239,9 +240,9 @@ export class WalletManager {
      *
      * @throws Will throw an error if the signer is null.
      */
-    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: Chain): Promise<void> {
+    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: ChainId): Promise<void> {
         if (requiredChain) {
-            const signerChain = await this.getWalletChain()
+            const signerChain = await this.getWalletChainId()
 
             if (signerChain !== requiredChain)
                 throw new Error(EthError.UNSUPPORTED_CHAIN)
@@ -295,13 +296,13 @@ export class WalletManager {
      *
      * @returns {Promise<number>} - Returns a promise that resolves to the current chainId.
      */
-    private async getWalletChain(): Promise<Chain | null> {
+    private async getWalletChainId(): Promise<ChainId | null> {
         if (!this._wrappedProvider)
             throw new Error(EthError.WALLET_NOT_CONNECTED)
 
         const chain = (await this._wrappedProvider.getNetwork()).chainId
 
-        return parseChain(chain, this.availableChains)
+        return Chain.parseChainId(chain, this.availableChainIds)
     }
 
     /**
@@ -310,15 +311,15 @@ export class WalletManager {
      * This function checks if the wallet's current chain is included in the list of available chains.
      * If it is, the wallet's current chain is returned. If not, the default chain is returned instead.
      *
-     * @returns {Chain} - Returns the current valid chain.
+     * @returns {ChainId} - Returns the current valid chain.
      */
-    private getValidChain(): Chain {
-        const walletChain = this._walletInfo?.chain
+    private getValidChainId(): ChainId {
+        const walletChain = this._walletInfo?.chainId
 
-        if (walletChain && this.availableChains.includes(walletChain))
+        if (walletChain && this.availableChainIds.includes(walletChain))
             return walletChain
 
-        return this.defaultChain
+        return this.defaultChainId
     }
 
     /**
@@ -342,7 +343,7 @@ export class WalletManager {
         const walletApplication = this._walletInfo?.application || this._currentWalletApplication
 
         if (address && walletApplication) {
-            const chain = this._walletInfo?.chain || await this.getWalletChain()
+            const chain = this._walletInfo?.chainId || await this.getWalletChainId()
 
             this._walletInfo = new WalletInfo(
                 walletApplication,
@@ -364,12 +365,12 @@ export class WalletManager {
      * This function is called when the 'chainChanged' event is emitted from the provider.
      * It updates the chainId property and emits a 'wallet-info' event with the updated wallet information.
      */
-    private _updateChain(chain: string): void {
+    private _updateChainId(chainId: string): void {
         if (!this._walletInfo)
             return
 
         this._walletInfo = this._walletInfo.withChain(
-            parseChain(chain, this.availableChains),
+            Chain.parseChainId(chainId, this.availableChainIds),
         )
 
         this.commit()

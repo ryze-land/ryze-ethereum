@@ -1,44 +1,46 @@
 import { JsonRpcProvider } from 'ethers'
-import { chainInfos } from '../assets'
-import { Chain } from '../enums'
-import { parseChain } from '../helpers'
-import { ChainMapFactory } from './ChainMapFactory'
+import { chainRegistry } from '../assets'
+import { ChainId } from '../enums'
+import { Chain } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
 
 export class Ethereum {
-    public readonly defaultChain: Chain
-    public readonly availableChains: Chain[]
+    public readonly defaultChainId: ChainId
+    public readonly availableChainIds: ChainId[]
     public readonly walletManager: WalletManager
-    private readonly _providers: Record<Chain, MultiRpcProvider | JsonRpcProvider>
+    private readonly _providers: Record<ChainId, MultiRpcProvider | JsonRpcProvider>
 
     constructor({
-        defaultChain,
-        availableChains,
+        defaultChainId,
+        availableChainIds,
         chainToRpcMap,
         onWalletUpdate,
     }: {
-        defaultChain: Chain
-        availableChains: Chain[]
-        chainToRpcMap?: Partial<Record<Chain, string[]>>
+        defaultChainId: ChainId
+        availableChainIds: ChainId[]
+        chainToRpcMap?: Partial<Record<ChainId, string[]>>
         onWalletUpdate?: OnWalletUpdate
     }) {
-        this.defaultChain = defaultChain
-        this.availableChains = availableChains
-        this.walletManager = new WalletManager(defaultChain, availableChains, onWalletUpdate)
+        this.defaultChainId = defaultChainId
+        this.availableChainIds = availableChainIds
+        this.walletManager = new WalletManager(defaultChainId, availableChainIds, onWalletUpdate)
 
-        this._providers = new ChainMapFactory(availableChains).create((chain: Chain) => {
-            const chainInfo = chainInfos[chain]
-            const rpcs = chainToRpcMap?.[chain] || chainInfo.rpcList
+        this._providers = Chain.createChainMap({
+            chainIds: availableChainIds,
+            initialValueCallback: (chainId: ChainId) => {
+                const chain = chainRegistry[chainId]
+                const rpcs = chainToRpcMap?.[chainId] || chain.rpcList
 
-            return rpcs.length === 1
-                ? new JsonRpcProvider(rpcs[0])
-                : new MultiRpcProvider(rpcs)
+                return rpcs.length === 1
+                    ? new JsonRpcProvider(rpcs[0])
+                    : new MultiRpcProvider(rpcs)
+            },
         })
     }
 
-    public validateChain(chain: Chain | number | string | bigint): chain is Chain {
-        return !!parseChain(chain, this.availableChains)
+    public validateChain(chain: ChainId | number | string | bigint): chain is ChainId {
+        return !!Chain.parseChainId(chain, this.availableChainIds)
     }
 
     /**
@@ -46,7 +48,7 @@ export class Ethereum {
      *
      * @param chain - The chain for which to get a provider.
      */
-    public getProvider(chain: Chain) {
+    public getProvider(chain: ChainId) {
         return this._providers[chain]
     }
 }

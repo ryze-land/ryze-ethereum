@@ -1,5 +1,5 @@
-import { Chain } from '../enums'
+import { ChainId } from '../enums'
 
-export const allChains: Chain[] = Object.keys(Chain)
+export const allChains: ChainId[] = Object.keys(ChainId)
     .map(n => Number.parseInt(n))
     .filter(n => !Number.isNaN(n))

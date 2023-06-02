@@ -1,9 +1,9 @@
-import { ChainInfo } from '../classes'
-import { Chain } from '../enums'
+import { Chain } from '../classes'
+import { ChainId } from '../enums'
 
-export const chainInfos: { [chain in Chain]: ChainInfo } = {
-    [Chain.ETH]: new ChainInfo(
-        Chain.ETH,
+export const chainRegistry: Record<ChainId, Chain> = {
+    [ChainId.ETH]: new Chain(
+        ChainId.ETH,
         'Ethereum',
         false,
         {
@@ -14,8 +14,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         ['https://rpc.ankr.com/eth'],
     ),
 
-    [Chain.BNB]: new ChainInfo(
-        Chain.BNB,
+    [ChainId.BNB]: new Chain(
+        ChainId.BNB,
         'BNB Smart Chain',
         false,
         {
@@ -25,8 +25,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         'https://bscscan.com',
         ['https://rpc.ankr.com/bsc'],
     ),
-    [Chain.BNB_TESTNET]: new ChainInfo(
-        Chain.BNB_TESTNET,
+    [ChainId.BNB_TESTNET]: new Chain(
+        ChainId.BNB_TESTNET,
         'BNB Smart Chain Testnet',
         true,
 
@@ -38,8 +38,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         ['https://rpc.ankr.com/bsc_testnet_chapel'],
     ),
 
-    [Chain.AVAX]: new ChainInfo(
-        Chain.AVAX,
+    [ChainId.AVAX]: new Chain(
+        ChainId.AVAX,
         'Avalanche',
         false,
         {
@@ -49,8 +49,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         'https://snowtrace.io',
         ['https://rpc.ankr.com/avalanche-c'],
     ),
-    [Chain.AVAX_TESTNET]: new ChainInfo(
-        Chain.AVAX_TESTNET,
+    [ChainId.AVAX_TESTNET]: new Chain(
+        ChainId.AVAX_TESTNET,
         'Avalanche Testnet',
         true,
         {
@@ -61,8 +61,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         ['https://api.avax-test.network/ext/bc/C/rpc'],
     ),
 
-    [Chain.POLYGON]: new ChainInfo(
-        Chain.POLYGON,
+    [ChainId.POLYGON]: new Chain(
+        ChainId.POLYGON,
         'Avalanche Testnet',
         false,
         {
@@ -72,8 +72,8 @@ export const chainInfos: { [chain in Chain]: ChainInfo } = {
         'https://polygonscan.com/',
         ['https://rpc.ankr.com/polygon'],
     ),
-    [Chain.POLYGON_TESTNET]: new ChainInfo(
-        Chain.POLYGON_TESTNET,
+    [ChainId.POLYGON_TESTNET]: new Chain(
+        ChainId.POLYGON_TESTNET,
         'Polygon Mumbai Testnet',
         true,
         {
