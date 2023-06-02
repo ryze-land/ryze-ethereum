@@ -1,2 +1,2 @@
 export * from './all-chains'
-export * from './blockchain-index'
+export * from './chain-registry'

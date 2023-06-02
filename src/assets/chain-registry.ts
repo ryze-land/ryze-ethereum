@@ -1,7 +1,7 @@
 import { Chain } from '../classes'
 import { ChainId } from '../enums'
 
-export const blockchainIndex: Record<ChainId, Chain> = {
+export const chainRegistry: Record<ChainId, Chain> = {
     [ChainId.ETH]: new Chain(
         ChainId.ETH,
         'Ethereum',

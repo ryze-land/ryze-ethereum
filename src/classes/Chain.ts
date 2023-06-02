@@ -22,13 +22,13 @@ export class Chain {
     }
 
     public static createChainMap<T>({
-        chains,
+        chainIds,
         initialValueCallback,
     }: {
-        chains?: ChainId[]
+        chainIds?: ChainId[]
         initialValueCallback?: (chain: ChainId) => T
     }) {
-        const _chains = chains || allChains
+        const _chains = chainIds || allChains
         const _initialValueCallback = initialValueCallback || (() => ({}))
 
         return _chains.reduce(
@@ -38,10 +38,10 @@ export class Chain {
     }
 
     public static isChainId(
-        chain: number,
+        chainId: number,
         availableChains: ChainId[] = allChains,
-    ): chain is ChainId {
-        return availableChains.includes(chain)
+    ): chainId is ChainId {
+        return availableChains.includes(chainId)
     }
 
     public static parseChainId(
