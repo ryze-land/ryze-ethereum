@@ -1,4 +1,4 @@
-export enum Chain {
+export enum ChainId {
     ETH = 1,
 
     BNB = 56,
