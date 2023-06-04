@@ -193,7 +193,7 @@ export class WalletManager {
                     return await this.addChain(chainId)
 
                 // In case request is already pending
-                if (e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
+                if (code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
                     throw new Error(EthError.REQUEST_ALREADY_PENDING)
             }
 
