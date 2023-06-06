@@ -87,13 +87,13 @@ export class WalletManager {
         }
 
         const [chainId, address] = await Promise.all([
-            this.getWalletChainId(),
-            this.getWalletAddress(),
+            this._getWalletChainId(),
+            this._getWalletAddress(),
         ])
 
         this._walletInfo = new WalletInfo(walletApplication, chainId, address, true)
 
-        this.commit()
+        this._commit()
     }
 
     /**
@@ -113,7 +113,7 @@ export class WalletManager {
                 false,
             )
 
-            this.commit()
+            this._commit()
 
             return await this.connect(walletInfo.application)
         }
@@ -137,7 +137,7 @@ export class WalletManager {
      */
     public disconnect(): void {
         this._walletInfo = null
-        this.commit()
+        this._commit()
     }
 
     /**
@@ -234,25 +234,6 @@ export class WalletManager {
     }
 
     /**
-     * Validates that the signer is correctly set up.
-     *
-     * If the signer is null, this function throws an error.
-     *
-     * @throws Will throw an error if the signer is null.
-     */
-    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: ChainId): Promise<void> {
-        if (requiredChain) {
-            const signerChain = await this.getWalletChainId()
-
-            if (signerChain !== requiredChain)
-                throw new Error(EthError.UNSUPPORTED_CHAIN)
-        }
-
-        if (!await signer.getAddress())
-            throw new Error(EthError.SIGNER_UNAVAILABLE)
-    }
-
-    /**
      * Sends a request to the provider.
      *
      * This function sends a request to the provider using its send method. The type of request and any associated parameters are specified in the method and params argument.
@@ -278,11 +259,30 @@ export class WalletManager {
     }
 
     /**
+     * Validates that the signer is correctly set up.
+     *
+     * If the signer is null, this function throws an error.
+     *
+     * @throws Will throw an error if the signer is null.
+     */
+    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: ChainId): Promise<void> {
+        if (requiredChain) {
+            const signerChain = await this._getWalletChainId()
+
+            if (signerChain !== requiredChain)
+                throw new Error(EthError.UNSUPPORTED_CHAIN)
+        }
+
+        if (!await signer.getAddress())
+            throw new Error(EthError.SIGNER_UNAVAILABLE)
+    }
+
+    /**
      * Retrieves the currently connected wallet address.
      *
      * @returns {Promise<string>} - Returns a promise that resolves to the current wallet address.
      */
-    private async getWalletAddress(): Promise<string> {
+    private async _getWalletAddress(): Promise<string> {
         const accounts = await this.request({ method: 'eth_requestAccounts' })
 
         if (!accounts.length)
@@ -296,7 +296,7 @@ export class WalletManager {
      *
      * @returns {Promise<number>} - Returns a promise that resolves to the current chainId.
      */
-    private async getWalletChainId(): Promise<ChainId | null> {
+    private async _getWalletChainId(): Promise<ChainId | null> {
         if (!this._wrappedProvider)
             throw new Error(EthError.WALLET_NOT_CONNECTED)
 
@@ -310,7 +310,7 @@ export class WalletManager {
      *
      * This function emits a 'wallet-info' event with the current wallet info and stores the wallet info in the storage.
      */
-    private commit(): void {
+    private _commit(): void {
         this._onWalletUpdate?.(this._walletInfo)
         this._storage.set(this._walletInfo)
     }
@@ -326,7 +326,7 @@ export class WalletManager {
         const walletApplication = this._walletInfo?.application || this._currentWalletApplication
 
         if (address && walletApplication) {
-            const chain = this._walletInfo?.chainId || await this.getWalletChainId()
+            const chain = this._walletInfo?.chainId || await this._getWalletChainId()
 
             this._walletInfo = new WalletInfo(
                 walletApplication,
@@ -339,7 +339,7 @@ export class WalletManager {
             this._walletInfo = null
         }
 
-        this.commit()
+        this._commit()
     }
 
     /**
@@ -356,7 +356,7 @@ export class WalletManager {
             Chain.parseChainId(chainId, this.availableChainIds),
         )
 
-        this.commit()
+        this._commit()
     }
 
     /**
