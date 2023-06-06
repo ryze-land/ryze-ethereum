@@ -306,23 +306,6 @@ export class WalletManager {
     }
 
     /**
-     * Gets the current valid chain.
-     *
-     * This function checks if the wallet's current chain is included in the list of available chains.
-     * If it is, the wallet's current chain is returned. If not, the default chain is returned instead.
-     *
-     * @returns {ChainId} - Returns the current valid chain.
-     */
-    private getValidChainId(): ChainId {
-        const walletChain = this._walletInfo?.chainId
-
-        if (walletChain && this.availableChainIds.includes(walletChain))
-            return walletChain
-
-        return this.defaultChainId
-    }
-
-    /**
      * Commits the current wallet info.
      *
      * This function emits a 'wallet-info' event with the current wallet info and stores the wallet info in the storage.
