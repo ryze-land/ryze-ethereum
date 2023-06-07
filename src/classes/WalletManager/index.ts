@@ -285,7 +285,7 @@ export class WalletManager {
 
         const transactionResponse = await signer.sendTransaction({
             ...transaction,
-            gasLimit: (await signer.estimateGas(transaction)) * (gasMultiplier || 2n),
+            gasLimit: (await signer.estimateGas(transaction)) * gasMultiplier,
         })
 
         if (onSend)
