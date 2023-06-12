@@ -1,4 +1,17 @@
+import {
+    object as zodObject,
+    string as zodString,
+    boolean as zodBoolean,
+    nativeEnum as zodNativeEnum,
+} from 'zod'
 import { ChainId, WalletApplication } from '../enums'
+
+export const walletInfoSchema = zodObject({
+    application: zodNativeEnum(WalletApplication),
+    chainId: zodNativeEnum(ChainId).nullable(),
+    address: zodString(),
+    connected: zodBoolean(),
+})
 
 export class WalletInfo {
     constructor(

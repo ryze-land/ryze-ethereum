@@ -13,7 +13,7 @@ import { isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { numberToHex } from '../../helpers'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
-import { WalletInfo } from '../WalletInfo'
+import { WalletInfo, walletInfoSchema } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
@@ -58,15 +58,10 @@ export class WalletManager {
         this._storage = new LocalStorage<WalletInfo | null>(
             'ethereum-wallet-info',
             storedValue => {
-                const json: {
-                    provider: WalletApplication,
-                    chainId: ChainId,
-                    address: string,
-                    connected: boolean,
-                } = JSON.parse(storedValue)
+                const json = walletInfoSchema.parse(JSON.parse(storedValue))
 
                 return new WalletInfo(
-                    json.provider,
+                    json.application,
                     json.chainId,
                     json.address,
                     json.connected,
