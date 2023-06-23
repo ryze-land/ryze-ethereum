@@ -86,7 +86,7 @@ export class WalletManager {
 
         this._currentWalletApplication = walletApplication
         this._nativeProvider = provider
-        this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider)
+        this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider, 'any')
 
         if (!this._initializedEvents) {
             this._addEventListener('accountsChanged', this._updateAddress)
@@ -156,14 +156,14 @@ export class WalletManager {
      *
      * @returns {Promise<JsonRpcSigner>} - Returns a promise that resolves to the JsonRpcSigner.
      */
-    public async getSigner(requiredChain?: ChainId): Promise<JsonRpcSigner> {
+    public async getSigner(): Promise<JsonRpcSigner> {
         if (!this._wrappedProvider)
             throw new Error(EthError.SIGNER_UNAVAILABLE)
 
         try {
             const signer = await this._wrappedProvider.getSigner()
 
-            await this._validateSigner(signer, requiredChain)
+            await this._validateSigner(signer)
 
             return signer
         }
@@ -276,7 +276,7 @@ export class WalletManager {
         if (!chainId)
             throw new Error(EthError.UNSUPPORTED_CHAIN)
 
-        const signer = await this.getSigner(chainId)
+        const signer = await this.getSigner()
 
         const transactionResponse = await signer.sendTransaction({
             ...transaction,
@@ -326,14 +326,7 @@ export class WalletManager {
      *
      * @throws Will throw an error if the signer is null.
      */
-    private async _validateSigner(signer: JsonRpcSigner, requiredChain?: ChainId): Promise<void> {
-        if (requiredChain) {
-            const signerChain = await this._getWalletChainId()
-
-            if (signerChain !== requiredChain)
-                throw new Error(EthError.UNSUPPORTED_CHAIN)
-        }
-
+    private async _validateSigner(signer: JsonRpcSigner): Promise<void> {
         if (!await signer.getAddress())
             throw new Error(EthError.SIGNER_UNAVAILABLE)
     }
@@ -361,9 +354,9 @@ export class WalletManager {
         if (!this._wrappedProvider)
             throw new Error(EthError.WALLET_NOT_CONNECTED)
 
-        const chain = (await this._wrappedProvider.getNetwork()).chainId
+        const chainId = (await this._wrappedProvider.getNetwork()).chainId
 
-        return Chain.parseChainId(chain, this.availableChainIds)
+        return Chain.parseChainId(chainId, this.availableChainIds)
     }
 
     /**
