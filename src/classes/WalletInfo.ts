@@ -7,7 +7,7 @@ import {
 import { ChainId, WalletApplication } from '../enums'
 
 export const walletInfoSchema = zodObject({
-    application: zodNativeEnum(WalletApplication),
+    application: zodNativeEnum(WalletApplication).nullable(),
     chainId: zodNativeEnum(ChainId).nullable(),
     address: zodString(),
     connected: zodBoolean(),
@@ -15,7 +15,7 @@ export const walletInfoSchema = zodObject({
 
 export class WalletInfo {
     constructor(
-        public readonly application: WalletApplication,
+        public readonly application: WalletApplication | null,
         public readonly chainId: ChainId | null,
         public readonly address: string,
         public readonly connected: boolean,
