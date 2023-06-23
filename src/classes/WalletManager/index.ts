@@ -124,7 +124,8 @@ export class WalletManager {
 
             this._commit()
 
-            return await this.connect(walletInfo.application)
+            if (walletInfo.application)
+                return await this.connect(walletInfo.application)
         }
 
         // TODO maybe switch to persisted chain and address
