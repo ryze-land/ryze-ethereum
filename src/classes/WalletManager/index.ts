@@ -86,7 +86,7 @@ export class WalletManager {
      */
     public async connect(
         walletApplication: WalletApplication,
-        { onReject, onRequestAlreadyPending }: WalletErrorHandlers = {},
+        walletErrorHandlers: WalletErrorHandlers = {},
     ): Promise<void> {
         // TODO check if this line opens metamask modal
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
@@ -116,15 +116,7 @@ export class WalletManager {
             this._commit()
         }
         catch (e) {
-            if (isEthersError(e) && isProviderError(e.error)) {
-                if (onReject && e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
-                    return onReject(e)
-
-                if (onRequestAlreadyPending && e.error.code === ProviderErrorCode.USER_REJECTED_REQUEST)
-                    return onRequestAlreadyPending(e)
-            }
-
-            throw e
+            return this._handleWalletErrors(e, walletErrorHandlers)
         }
     }
 
@@ -201,7 +193,7 @@ export class WalletManager {
 
     public async setChain(
         chainId: ChainId,
-        { onReject, onRequestAlreadyPending }: WalletErrorHandlers = {},
+        walletErrorHandlers: WalletErrorHandlers = {},
     ): Promise<void> {
         const walletInfo = this._walletInfo
 
@@ -218,29 +210,14 @@ export class WalletManager {
             })
         }
         catch (e) {
-            if (isEthersError(e)) {
-                const providerError = isProviderError(e.error) ? e.error : undefined
-
+            if (isEthersError(e) && isProviderError(e.error)) {
                 // In case the chain is not registered in the user's wallet
-                const missingChain = providerError?.code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
-                    providerError?.code === ProviderErrorCode.INTERNAL
-
-                if (missingChain)
+                if (e.error.code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
+                    e.error.code === ProviderErrorCode.INTERNAL)
                     return await this.addChain(chainId)
-
-                const actionRejected = e.code === EthersErrorCode.ACTION_REJECTED ||
-                    providerError?.code === ProviderErrorCode.USER_REJECTED_REQUEST
-
-                if (onReject && actionRejected)
-                    return onReject(e)
-
-                const resourceUnavailable = providerError?.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
-
-                if (onRequestAlreadyPending && resourceUnavailable)
-                    return onRequestAlreadyPending(e)
             }
 
-            throw e
+            return this._handleWalletErrors(e, walletErrorHandlers)
         }
     }
 
@@ -351,6 +328,31 @@ export class WalletManager {
             throw new Error(EthError.UNSUPPORTED_REQUEST)
 
         return await this._wrappedProvider.provider.send(method, params || [])
+    }
+
+    private _handleWalletErrors(
+        e: unknown,
+        {
+            onReject,
+            onRequestAlreadyPending,
+        }: WalletErrorHandlers,
+    ): void | Promise<void> {
+        if (isEthersError(e)) {
+            const providerError = isProviderError(e.error) ? e.error : undefined
+
+            const actionRejected = e.code === EthersErrorCode.ACTION_REJECTED ||
+                providerError?.code === ProviderErrorCode.USER_REJECTED_REQUEST
+
+            if (onReject && actionRejected)
+                return onReject(e)
+
+            const resourceUnavailable = providerError?.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
+
+            if (onRequestAlreadyPending && resourceUnavailable)
+                return onRequestAlreadyPending(e)
+        }
+
+        throw e
     }
 
     /**
