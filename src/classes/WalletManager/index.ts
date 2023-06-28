@@ -26,6 +26,11 @@ export interface TransactionOptions {
     requiredConfirmations?: number
 }
 
+export interface WalletErrorHandlers {
+    onReject?: (e: EthersError) => void | Promise<void>,
+    onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
+}
+
 // TODO: must test interactions with all added wallet providers
 // Tested wallet providers:
 // - Metamask
@@ -81,13 +86,7 @@ export class WalletManager {
      */
     public async connect(
         walletApplication: WalletApplication,
-        {
-            onReject,
-            onRequestAlreadyPending,
-        }: {
-            onReject?: (e: EthersError) => void | Promise<void>,
-            onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
-        } = {},
+        { onReject, onRequestAlreadyPending }: WalletErrorHandlers = {},
     ): Promise<void> {
         // TODO check if this line opens metamask modal
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
@@ -132,13 +131,7 @@ export class WalletManager {
     /**
      * Attempts to reestablish a previously active connection.
      */
-    public async reconnect({
-        onReject,
-        onRequestAlreadyPending,
-    }: {
-        onReject?: (e: EthersError) => void | Promise<void>,
-        onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
-    } = {}): Promise<void> {
+    public async reconnect(walletErrorHandlers: WalletErrorHandlers = {}): Promise<void> {
         if (this._walletInfo)
             return
 
@@ -154,12 +147,8 @@ export class WalletManager {
 
             this._commit()
 
-            if (walletInfo.application) {
-                return await this.connect(walletInfo.application, {
-                    onReject,
-                    onRequestAlreadyPending,
-                })
-            }
+            if (walletInfo.application)
+                return await this.connect(walletInfo.application, walletErrorHandlers)
         }
 
         // TODO maybe switch to persisted chain and address
@@ -212,13 +201,7 @@ export class WalletManager {
 
     public async setChain(
         chainId: ChainId,
-        {
-            onReject,
-            onRequestAlreadyPending,
-        }: {
-            onReject?: (e: EthersError) => void | Promise<void>,
-            onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
-        } = {},
+        { onReject, onRequestAlreadyPending }: WalletErrorHandlers = {},
     ): Promise<void> {
         const walletInfo = this._walletInfo
 
