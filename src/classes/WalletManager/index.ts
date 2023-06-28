@@ -33,6 +33,10 @@ export interface WalletErrorHandlers {
     onRequestAlreadyPending?: WalletErrorHandler<EthersError>,
 }
 
+export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
+    onProviderUnavailable?: WalletErrorHandler<WalletApplication>
+}
+
 // TODO: must test interactions with all added wallet providers
 // Tested wallet providers:
 // - Metamask
@@ -88,9 +92,7 @@ export class WalletManager {
      */
     public async connect(
         walletApplication: WalletApplication,
-        walletErrorHandlers?: WalletErrorHandlers & {
-            onProviderUnavailable?: WalletErrorHandler<WalletApplication>
-        },
+        walletErrorHandlers?: ConnectWalletErrorHandlers,
     ): Promise<void> {
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
@@ -130,7 +132,7 @@ export class WalletManager {
     /**
      * Attempts to reestablish a previously active connection.
      */
-    public async reconnect(walletErrorHandlers?: WalletErrorHandlers): Promise<void> {
+    public async reconnect(walletErrorHandlers?: ConnectWalletErrorHandlers): Promise<void> {
         if (this._walletInfo)
             return
 
