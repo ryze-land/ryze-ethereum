@@ -24,12 +24,7 @@ export const ethereum = new Ethereum({
 2. Connect to a wallet provider
 
 ```typescript
-import {
-    isEthersError,
-    isProviderError,
-    ProviderErrorCode,
-    WalletApplication,
-} from '@ryze-blockchain/ethereum'
+import { isEthersError, isProviderError, ProviderErrorCode, WalletApplication } from '@ryze-blockchain/ethereum'
 import { ethereum } from './ethereum.ts'
 
 const connectWallet = async () => {
@@ -55,12 +50,7 @@ const connectWallet = async () => {
 3. Request to set a chain in the user's wallet 
 
 ```typescript
-import {
-    isEthersError,
-    isProviderError,
-    ProviderErrorCode,
-    ChainId,
-} from '@ryze-blockchain/ethereum'
+import { isEthersError, isProviderError, ProviderErrorCode, ChainId } from '@ryze-blockchain/ethereum'
 import { ethereum } from './ethereum.ts'
 
 const setChain = async (chainId: ChainId) => {
