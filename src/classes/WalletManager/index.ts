@@ -3,13 +3,14 @@ import {
     BrowserProvider,
     ContractTransaction,
     Eip1193Provider,
+    EthersError,
     JsonRpcSigner,
     TransactionReceipt,
     TransactionResponse,
 } from 'ethers'
 import { chainRegistry } from '../../assets'
 import { ChainId, EthError, WalletApplication } from '../../enums'
-import { isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
+import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { numberToHex } from '../../helpers'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
@@ -176,7 +177,16 @@ export class WalletManager {
         }
     }
 
-    public async setChain(chainId: ChainId): Promise<void> {
+    public async setChain(
+        chainId: ChainId,
+        {
+            onReject,
+            onRequestAlreadyPending,
+        }: {
+            onReject?: (e: EthersError) => void,
+            onRequestAlreadyPending?: (e: EthersError) => void,
+        } = {},
+    ): Promise<void> {
         const walletInfo = this._walletInfo
 
         if (!walletInfo?.address || !walletInfo?.connected)
@@ -192,19 +202,26 @@ export class WalletManager {
             })
         }
         catch (e) {
-            if (isEthersError(e) && isProviderError(e.error)) {
-                const code = e.error.code
+            if (isEthersError(e)) {
+                const providerError = isProviderError(e.error) ? e.error : undefined
 
                 // In case the chain is not registered in the user's wallet
-                if (
-                    code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
-                    code === ProviderErrorCode.INTERNAL
-                )
+                const missingChain = providerError?.code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
+                    providerError?.code === ProviderErrorCode.INTERNAL
+
+                if (missingChain)
                     return await this.addChain(chainId)
 
-                // In case request is already pending
-                if (code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
-                    throw new Error(EthError.REQUEST_ALREADY_PENDING)
+                const actionRejected = e.code === EthersErrorCode.ACTION_REJECTED ||
+                    providerError?.code === ProviderErrorCode.USER_REJECTED_REQUEST
+
+                if (onReject && actionRejected)
+                    return onReject(e)
+
+                const resourceUnavailable = providerError?.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
+
+                if (onRequestAlreadyPending && resourceUnavailable)
+                    return onRequestAlreadyPending(e)
             }
 
             throw e
