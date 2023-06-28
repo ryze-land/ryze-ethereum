@@ -26,9 +26,11 @@ export interface TransactionOptions {
     requiredConfirmations?: number
 }
 
+export type WalletErrorHandler<DataType> = (data: DataType) => void | Promise<void>
+
 export interface WalletErrorHandlers {
-    onReject?: (e: EthersError) => void | Promise<void>,
-    onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
+    onReject?: WalletErrorHandler<EthersError>,
+    onRequestAlreadyPending?: WalletErrorHandler<EthersError>,
 }
 
 // TODO: must test interactions with all added wallet providers
@@ -86,13 +88,18 @@ export class WalletManager {
      */
     public async connect(
         walletApplication: WalletApplication,
-        walletErrorHandlers: WalletErrorHandlers = {},
+        walletErrorHandlers?: WalletErrorHandlers & {
+            onProviderUnavailable?: WalletErrorHandler<WalletApplication>
+        },
     ): Promise<void> {
-        // TODO check if this line opens metamask modal
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
-        if (!provider)
+        if (!provider) {
+            if (walletErrorHandlers?.onProviderUnavailable)
+                return walletErrorHandlers.onProviderUnavailable(walletApplication)
+
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
+        }
 
         try {
             this._currentWalletApplication = walletApplication
@@ -123,7 +130,7 @@ export class WalletManager {
     /**
      * Attempts to reestablish a previously active connection.
      */
-    public async reconnect(walletErrorHandlers: WalletErrorHandlers = {}): Promise<void> {
+    public async reconnect(walletErrorHandlers?: WalletErrorHandlers): Promise<void> {
         if (this._walletInfo)
             return
 
@@ -193,7 +200,7 @@ export class WalletManager {
 
     public async setChain(
         chainId: ChainId,
-        walletErrorHandlers: WalletErrorHandlers = {},
+        walletErrorHandlers?: WalletErrorHandlers,
     ): Promise<void> {
         const walletInfo = this._walletInfo
 
@@ -332,21 +339,18 @@ export class WalletManager {
 
     private _handleWalletErrors(
         e: unknown,
-        {
-            onReject,
-            onRequestAlreadyPending,
-        }: WalletErrorHandlers,
+        { onReject, onRequestAlreadyPending }: WalletErrorHandlers = {},
     ): void | Promise<void> {
         if (isEthersError(e)) {
-            const providerError = isProviderError(e.error) ? e.error : undefined
+            const providerErrorCode = isProviderError(e.error) ? e.error.code : undefined
 
             const actionRejected = e.code === EthersErrorCode.ACTION_REJECTED ||
-                providerError?.code === ProviderErrorCode.USER_REJECTED_REQUEST
+                providerErrorCode === ProviderErrorCode.USER_REJECTED_REQUEST
 
             if (onReject && actionRejected)
                 return onReject(e)
 
-            const resourceUnavailable = providerError?.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
+            const resourceUnavailable = providerErrorCode === ProviderErrorCode.RESOURCE_UNAVAILABLE
 
             if (onRequestAlreadyPending && resourceUnavailable)
                 return onRequestAlreadyPending(e)
