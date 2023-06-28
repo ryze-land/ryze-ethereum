@@ -79,37 +79,66 @@ export class WalletManager {
      *
      * @returns {Promise<void>}
      */
-    public async connect(walletApplication: WalletApplication): Promise<void> {
+    public async connect(
+        walletApplication: WalletApplication,
+        {
+            onReject,
+            onRequestAlreadyPending,
+        }: {
+            onReject?: (e: EthersError) => void | Promise<void>,
+            onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
+        } = {},
+    ): Promise<void> {
+        // TODO check if this line opens metamask modal
         const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
 
         if (!provider)
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
-        this._currentWalletApplication = walletApplication
-        this._nativeProvider = provider
-        this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider, 'any')
+        try {
+            this._currentWalletApplication = walletApplication
+            this._nativeProvider = provider
+            this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider, 'any')
 
-        if (!this._initializedEvents) {
-            this._addEventListener('accountsChanged', this._updateAddress)
-            this._addEventListener('chainChanged', this._updateChainId)
+            if (!this._initializedEvents) {
+                this._addEventListener('accountsChanged', this._updateAddress)
+                this._addEventListener('chainChanged', this._updateChainId)
 
-            this._initializedEvents = true
+                this._initializedEvents = true
+            }
+
+            const [chainId, address] = await Promise.all([
+                this._getWalletChainId(),
+                this._getWalletAddress(),
+            ])
+
+            this._walletInfo = new WalletInfo(walletApplication, chainId, address, true)
+
+            this._commit()
         }
+        catch (e) {
+            if (isEthersError(e) && isProviderError(e.error)) {
+                if (onReject && e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE)
+                    return onReject(e)
 
-        const [chainId, address] = await Promise.all([
-            this._getWalletChainId(),
-            this._getWalletAddress(),
-        ])
+                if (onRequestAlreadyPending && e.error.code === ProviderErrorCode.USER_REJECTED_REQUEST)
+                    return onRequestAlreadyPending(e)
+            }
 
-        this._walletInfo = new WalletInfo(walletApplication, chainId, address, true)
-
-        this._commit()
+            throw e
+        }
     }
 
     /**
      * Attempts to reestablish a previously active connection.
      */
-    public async reconnect(): Promise<void> {
+    public async reconnect({
+        onReject,
+        onRequestAlreadyPending,
+    }: {
+        onReject?: (e: EthersError) => void | Promise<void>,
+        onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
+    } = {}): Promise<void> {
         if (this._walletInfo)
             return
 
@@ -125,8 +154,12 @@ export class WalletManager {
 
             this._commit()
 
-            if (walletInfo.application)
-                return await this.connect(walletInfo.application)
+            if (walletInfo.application) {
+                return await this.connect(walletInfo.application, {
+                    onReject,
+                    onRequestAlreadyPending,
+                })
+            }
         }
 
         // TODO maybe switch to persisted chain and address
@@ -183,8 +216,8 @@ export class WalletManager {
             onReject,
             onRequestAlreadyPending,
         }: {
-            onReject?: (e: EthersError) => void,
-            onRequestAlreadyPending?: (e: EthersError) => void,
+            onReject?: (e: EthersError) => void | Promise<void>,
+            onRequestAlreadyPending?: (e: EthersError) => void | Promise<void>,
         } = {},
     ): Promise<void> {
         const walletInfo = this._walletInfo
