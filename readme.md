@@ -32,9 +32,9 @@ import { ethereum } from './ethereum.ts'
 // You can use any one of the available WalletApplications
 const connectWallet = async (walletApplication: WalletApplication) => {
     return await ethereum.walletManager.connect(walletApplication, {
-        onReject: () => throw new Error('User rejected wallet connection'),
-        onRequestAlreadyPending: () => throw new Error('Wallet connection already pending'),
-        onProviderUnavailable: () => throw new Error('Wallet provider not available'),
+        onReject: () => { throw new Error('User rejected wallet connection') },
+        onRequestAlreadyPending: () => { throw new Error('Wallet connection already pending') },
+        onProviderUnavailable: () => { throw new Error('Wallet provider not available') },
     })
 }
 ```
@@ -48,8 +48,8 @@ import { ethereum } from './ethereum.ts'
 
 const setChain = async (chainId: ChainId) => {
     return await ethereum.walletManager.setChain(chainId, {
-        onReject: () => throw new Error('Request rejected by the user'),
-        onRequestAlreadyPending: () => throw new Error('Request to switch chain already pending'),
+        onReject: () => { throw new Error('Request rejected by the user') },
+        onRequestAlreadyPending: () => { throw new Error('Request to switch chain already pending') },
     })
 }
 ```
