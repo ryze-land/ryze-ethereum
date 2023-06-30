@@ -2,6 +2,10 @@
 
 An opinionated wrapper to simplify the integration with ethers, a popular Ethereum library.
 
+## Installation
+
+`npm i @ryze-blockchain/ethereum`
+
 ## Usage
 
 1. Initialize
