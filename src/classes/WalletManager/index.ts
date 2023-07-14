@@ -121,9 +121,7 @@ export class WalletManager {
                 this._getWalletAddress(),
             ])
 
-            this._walletInfo = new WalletInfo(walletApplication, chainId, address, true)
-
-            this._commit()
+            this.walletInfo = new WalletInfo(walletApplication, chainId, address, true)
         }
         catch (e) {
             return this._handleWalletErrors(e, walletErrorHandlers)
@@ -140,14 +138,12 @@ export class WalletManager {
         const walletInfo = this._storage.get()
 
         if (walletInfo) {
-            this._walletInfo = new WalletInfo(
+            this.walletInfo = new WalletInfo(
                 walletInfo.application,
                 walletInfo.chainId,
                 walletInfo.address,
                 false,
             )
-
-            this._commit()
 
             if (walletInfo.application)
                 return await this.connect(walletInfo.application, walletErrorHandlers)
@@ -168,11 +164,20 @@ export class WalletManager {
     }
 
     /**
+     * Manually sets and commits a WalletInfo
+     *
+     * @param walletInfo
+     */
+    public set walletInfo(walletInfo: WalletInfo | null) {
+        this._walletInfo = walletInfo
+        this._commit()
+    }
+
+    /**
      * Disconnects the currently connected wallet, if any.
      */
     public disconnect(): void {
-        this._walletInfo = null
-        this._commit()
+        this.walletInfo = null
     }
 
     /**
@@ -425,7 +430,7 @@ export class WalletManager {
         if (address && walletApplication) {
             const chain = this._walletInfo?.chainId || await this._getWalletChainId()
 
-            this._walletInfo = new WalletInfo(
+            this.walletInfo = new WalletInfo(
                 walletApplication,
                 chain,
                 addresses[0],
@@ -433,10 +438,8 @@ export class WalletManager {
             )
         }
         else {
-            this._walletInfo = null
+            this.walletInfo = null
         }
-
-        this._commit()
     }
 
     /**
@@ -449,11 +452,9 @@ export class WalletManager {
         if (!this._walletInfo)
             return
 
-        this._walletInfo = this._walletInfo.withChain(
+        this.walletInfo = this._walletInfo.withChain(
             Chain.parseChainId(chainId, this.availableChainIds),
         )
-
-        this._commit()
     }
 
     /**
