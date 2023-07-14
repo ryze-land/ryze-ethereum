@@ -20,8 +20,9 @@ import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
 export interface TransactionOptions {
-    onSend?: (transactionResponse?: TransactionResponse) => void,
-    onConfirm?: (transactionReceipt?: TransactionReceipt | null) => void,
+    onReadyToSign?: () => void,
+    onBroadcast?: (transactionResponse?: TransactionResponse) => void | Promise<void>,
+    onConfirm?: (transactionReceipt?: TransactionReceipt | null) => void | Promise<void>,
     gasMultiplier?: bigint
     requiredConfirmations?: number
 }
@@ -273,8 +274,8 @@ export class WalletManager {
      * @param {PreparedTransactionRequest} transaction - The transaction to be sent.
      * @param {TransactionOptions} options - The transaction options, including optional callbacks and gas settings.
      *
-     * `onSend`: An optional callback function that will be called with the transaction response immediately after the transaction is broadcast to the network.
-     * `onConfirm`: An optional callback function that will be called with the transaction receipt after the transaction is confirmed.
+     * `onReadyToSign`: An optional callback function that will be called once the transaction is prepared and ready to sign.
+     * `onBroadcast`: An optional callback function that will be called with the transaction response immediately after the transaction is broadcast to the network.
      * `gasMultiplier`: A multiplier for the estimated gas limit, defaults to 2.
      * `requiredConfirmations`: The number of confirmations required before considering the transaction confirmed. Default is 1.
      *
@@ -285,7 +286,8 @@ export class WalletManager {
     public async sendTransaction(
         transaction: PreparedTransactionRequest,
         {
-            onSend,
+            onReadyToSign,
+            onBroadcast,
             onConfirm,
             gasMultiplier = 2n,
             requiredConfirmations = 1,
@@ -297,20 +299,18 @@ export class WalletManager {
             throw new Error(EthError.UNSUPPORTED_CHAIN)
 
         const signer = await this.getSigner()
+        const gasLimit = (await signer.estimateGas(transaction)) * gasMultiplier
 
-        const transactionResponse = await signer.sendTransaction({
-            ...transaction,
-            gasLimit: (await signer.estimateGas(transaction)) * gasMultiplier,
-        })
+        onReadyToSign?.()
 
-        if (onSend)
-            onSend(transactionResponse)
+        const transactionResponse = await signer.sendTransaction({ ...transaction, gasLimit })
+
+        await onBroadcast?.(transactionResponse)
 
         if (requiredConfirmations) {
             const receipt = await transactionResponse.wait(requiredConfirmations)
 
-            if (onConfirm)
-                await onConfirm(receipt)
+            await onConfirm?.(receipt)
         }
     }
 
