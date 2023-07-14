@@ -1,7 +1,7 @@
 import detectEthereumProvider from '@metamask/detect-provider'
 import {
     BrowserProvider,
-    ContractTransaction,
+    PreparedTransactionRequest,
     Eip1193Provider,
     EthersError,
     JsonRpcSigner,
@@ -270,7 +270,7 @@ export class WalletManager {
      *
      * It provides optional callbacks for when the transaction is sent and when it is confirmed.
      *
-     * @param {ContractTransaction} transaction - The transaction to be sent.
+     * @param {PreparedTransactionRequest} transaction - The transaction to be sent.
      * @param {TransactionOptions} options - The transaction options, including optional callbacks and gas settings.
      *
      * `onSend`: An optional callback function that will be called with the transaction response immediately after the transaction is broadcast to the network.
@@ -283,7 +283,7 @@ export class WalletManager {
      * @returns {Promise<void>} - Returns a promise that resolves when the transaction is sent and all callbacks have been processed.
      */
     public async sendTransaction(
-        transaction: ContractTransaction,
+        transaction: PreparedTransactionRequest,
         {
             onSend,
             onConfirm,
