@@ -276,6 +276,7 @@ export class WalletManager {
      *
      * `onReadyToSign`: An optional callback function that will be called once the transaction is prepared and ready to sign.
      * `onBroadcast`: An optional callback function that will be called with the transaction response immediately after the transaction is broadcast to the network.
+     * `onConfirm`: An optional callback function that will be called with the transaction receipt after the transaction is confirmed.
      * `gasMultiplier`: A multiplier for the estimated gas limit, defaults to 2.
      * `requiredConfirmations`: The number of confirmations required before considering the transaction confirmed. Default is 1.
      *
