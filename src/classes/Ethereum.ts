@@ -1,14 +1,16 @@
-import { JsonRpcProvider } from 'ethers'
+import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
 import { chainRegistry } from '../assets'
 import { ChainId } from '../enums'
 import { Chain } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
+import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
     public readonly availableChainIds: ChainId[]
     public readonly walletManager: WalletManager
+    public readonly gasMultiplier: bigint
     private readonly _providers: Record<ChainId, MultiRpcProvider | JsonRpcProvider>
 
     constructor({
@@ -16,15 +18,18 @@ export class Ethereum {
         availableChainIds,
         chainToRpcMap,
         onWalletUpdate,
+        gasMultiplier = 2n,
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
         chainToRpcMap?: Partial<Record<ChainId, string[]>>
         onWalletUpdate?: OnWalletUpdate
+        gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
         this.availableChainIds = availableChainIds
         this.walletManager = new WalletManager(defaultChainId, availableChainIds, onWalletUpdate)
+        this.gasMultiplier = gasMultiplier
 
         this._providers = Chain.createChainMap({
             chainIds: availableChainIds,
@@ -37,6 +42,14 @@ export class Ethereum {
                     : new MultiRpcProvider(rpcs)
             },
         })
+    }
+
+    public async transaction(transaction: PreparedTransactionRequest) {
+        return Transaction.initialize(
+            transaction,
+            await this.walletManager.getSigner(),
+            this.gasMultiplier,
+        )
     }
 
     public validateChain(chain: ChainId | number | string | bigint): chain is ChainId {
