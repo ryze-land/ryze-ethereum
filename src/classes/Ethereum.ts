@@ -10,17 +10,21 @@ export class Ethereum {
     public readonly defaultChainId: ChainId
     public readonly availableChainIds: ChainId[]
     public readonly walletManager: WalletManager
-
-    /**
-     * Multiplier used for estimating the gas limit for transactions.
-     * The value is represented in thousandths.
-     * A value of 1_000 denotes no multiplier (i.e., actual gas limit),
-     * while a value of 2_000 means the gas limit is doubled.
-     */
     public readonly gasMultiplier: bigint
-
     private readonly _providers: Record<ChainId, MultiRpcProvider | JsonRpcProvider>
 
+    /**
+     * Constructor for the Ethereum class.
+     *
+     * @param defaultChainId - The default ChainId to be used.
+     * @param availableChainIds - Array of available ChainIds.
+     * @param chainToRpcMap - Optional mapping from ChainIds to RPC URLs.
+     * @param onWalletUpdate - Optional callback to be invoked when the wallet updates.
+     * @param gasMultiplier - Optional multiplier to be used when estimating the gas limit for transactions.
+     *                        The value is represented in thousandths. A value of 1_000 denotes no multiplier
+     *                        (i.e., actual gas limit), while a value of 2_000 means the gas limit is doubled.
+     *                        If not provided, a default value of 2_000 is used.
+     */
     constructor({
         defaultChainId,
         availableChainIds,
