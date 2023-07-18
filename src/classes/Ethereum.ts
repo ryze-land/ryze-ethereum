@@ -10,7 +10,15 @@ export class Ethereum {
     public readonly defaultChainId: ChainId
     public readonly availableChainIds: ChainId[]
     public readonly walletManager: WalletManager
+
+    /**
+     * Multiplier used for estimating the gas limit for transactions.
+     * The value is represented in thousandths.
+     * A value of 1_000 denotes no multiplier (i.e., actual gas limit),
+     * while a value of 2_000 means the gas limit is doubled.
+     */
     public readonly gasMultiplier: bigint
+
     private readonly _providers: Record<ChainId, MultiRpcProvider | JsonRpcProvider>
 
     constructor({
@@ -18,7 +26,7 @@ export class Ethereum {
         availableChainIds,
         chainToRpcMap,
         onWalletUpdate,
-        gasMultiplier = 2n,
+        gasMultiplier = 2_000n, // multiplied by 1_000
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
@@ -44,14 +52,30 @@ export class Ethereum {
         })
     }
 
-    public async transaction(transaction: PreparedTransactionRequest) {
+    /**
+     * Initializes a transaction with the given PreparedTransactionRequest.
+     * If a custom gas multiplier is provided, it will be used for estimating
+     * the gas limit; otherwise, the Ethereum instance's default gas multiplier
+     * is applied. The gas multiplier is in thousandths. For instance,
+     * a value of 1_000 represents no multiplier (i.e., actual gas limit),
+     * while a value of 2_000 would double the gas limit.
+     *
+     * @param transaction - The PreparedTransactionRequest to initialize the transaction.
+     * @param gasMultiplier - Custom multiplier to be used for gas limit estimation.
+     */
+    public async transaction(transaction: PreparedTransactionRequest, gasMultiplier?: bigint) {
         return Transaction.initialize(
             transaction,
             await this.walletManager.getSigner(),
-            this.gasMultiplier,
+            gasMultiplier || this.gasMultiplier,
         )
     }
 
+    /**
+     * Validates if a given chain is a valid ChainId.
+     *
+     * @param chain - The chain to validate.
+     */
     public validateChain(chain: ChainId | number | string | bigint): chain is ChainId {
         return !!Chain.parseChainId(chain, this.availableChainIds)
     }
