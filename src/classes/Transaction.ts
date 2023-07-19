@@ -14,22 +14,21 @@ export class Transaction {
     }
 
     /**
-     * Asynchronously initializes a Transaction instance.
-     *
-     * The gas limit of the transaction is estimated by the signer and multiplied
-     * by the provided gas multiplier (in thousandths). For example, a gasMultiplier
-     * of 1_000 means no increase in the estimated gas limit, whereas 2_000 doubles it.
+     * Asynchronously initializes a Transaction instance, with the gas limit determined
+     * by applying the provided gas multiplier to the signer's estimated gas limit.
      *
      * @param transaction - PreparedTransactionRequest object containing transaction details.
-     * @param signer - Signer object to estimate gas and sign the transaction.
-     * @param gasMultiplier - Multiplier for estimating the gas limit.
+     * @param signer - Signer object used to estimate gas and sign the transaction.
+     * @param gasMultiplier - A factor used to adjust the estimated gas limit for the transaction.
+     *                        The value is represented in thousandths, where 1_000 means no adjustment
+     *                        (i.e., actual estimated gas limit), and 2_000 doubles the gas limit.
      * @returns - A promise that resolves to a new Transaction instance.
      */
     public static async initialize(
         transaction: PreparedTransactionRequest,
         signer: JsonRpcSigner,
         gasMultiplier: bigint,
-    ) {
+    ): Promise<Transaction> {
         return new Transaction(
             {
                 ...transaction,
@@ -44,11 +43,21 @@ export class Transaction {
         )
     }
 
+    /**
+     * Estimates the gas limit for a transaction using a provider and applies a specified multiplier.
+     *
+     * @param transaction - PreparedTransactionRequest object containing transaction details.
+     * @param provider - Provider object used to estimate the gas limit.
+     * @param gasMultiplier - A factor used to adjust the estimated gas limit for the transaction.
+     *                        The value is represented in thousandths, where 1_000 means no adjustment
+     *                        (i.e., actual estimated gas limit), and 2_000 doubles the gas limit.
+     * @returns - A promise that resolves to the calculated gas limit.
+     */
     public static async estimateGas(
         transaction: PreparedTransactionRequest,
         provider: AbstractProvider,
         gasMultiplier: bigint,
-    ) {
+    ): Promise<bigint> {
         return (await provider.estimateGas(transaction)) * gasMultiplier / 1_000n
     }
 

@@ -57,17 +57,19 @@ export class Ethereum {
     }
 
     /**
-     * Initializes a transaction with the given PreparedTransactionRequest.
-     * If a custom gas multiplier is provided, it will be used for estimating
-     * the gas limit; otherwise, the Ethereum instance's default gas multiplier
-     * is applied. The gas multiplier is in thousandths. For instance,
-     * a value of 1_000 represents no multiplier (i.e., actual gas limit),
-     * while a value of 2_000 would double the gas limit.
+     * Initializes a transaction based on the provided PreparedTransactionRequest.
+     * The gas limit is estimated using the `gasMultiplier` which affects the final gas cost of the transaction.
      *
-     * @param transaction - The PreparedTransactionRequest to initialize the transaction.
-     * @param gasMultiplier - Custom multiplier to be used for gas limit estimation.
+     * @param transaction - The transaction details to initialize.
+     * @param gasMultiplier - Optional. A factor used to adjust the estimated gas limit for the transaction.
+     *                        The value is represented in thousandths, where 1_000 means no adjustment
+     *                        (i.e., actual estimated gas limit), and 2_000 doubles the gas limit.
+     *                        If not provided, the Ethereum instance's default gasMultiplier is used.
      */
-    public async transaction(transaction: PreparedTransactionRequest, gasMultiplier?: bigint) {
+    public async initializeTransaction(
+        transaction: PreparedTransactionRequest,
+        gasMultiplier?: bigint,
+    ): Promise<Transaction> {
         return Transaction.initialize(
             transaction,
             await this.walletManager.getSigner(),
