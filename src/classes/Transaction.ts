@@ -74,4 +74,15 @@ export class Transaction {
     public send() {
         return this.signer.sendTransaction(this.transaction)
     }
+
+    /**
+     * Calls the transaction using the signer provided during the initialization.
+     * This does not send a real Ethereum transaction, but simulates a transaction call
+     * and returns the result of the call, which can be useful for reading data from a contract.
+     *
+     * @returns - A promise that resolves to the result of the transaction call.
+     */
+    public call() {
+        return this.signer.call(this.transaction)
+    }
 }
