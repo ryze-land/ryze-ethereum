@@ -29,12 +29,17 @@ export class Transaction {
         signer: JsonRpcSigner,
         gasMultiplier: bigint,
     ): Promise<Transaction> {
+        const from = await signer.getAddress()
+        const transactionWithSender = {
+            ...transaction,
+            from,
+        }
+
         return new Transaction(
             {
-                ...transaction,
-                // TODO check if signer.provider sets the from in the transaction
+                ...transactionWithSender,
                 gasLimit: await Transaction.estimateGas(
-                    transaction,
+                    transactionWithSender,
                     signer.provider,
                     gasMultiplier,
                 ),
