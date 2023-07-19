@@ -80,9 +80,13 @@ export class Transaction {
      * This does not send a real Ethereum transaction, but simulates a transaction call
      * and returns the result of the call, which can be useful for reading data from a contract.
      *
+     * @param overrides - Optional PreparedTransactionRequest object containing any overrides for the call.
      * @returns - A promise that resolves to the result of the transaction call.
      */
-    public call() {
-        return this.signer.call(this.transaction)
+    public call(overrides: PreparedTransactionRequest = {}) {
+        return this.signer.call({
+            ...this.transaction,
+            ...overrides,
+        })
     }
 }
