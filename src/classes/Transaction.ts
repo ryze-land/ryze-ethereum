@@ -1,4 +1,4 @@
-import { JsonRpcSigner, PreparedTransactionRequest } from 'ethers'
+import { AbstractProvider, JsonRpcSigner, PreparedTransactionRequest } from 'ethers'
 
 export class Transaction {
     /**
@@ -30,15 +30,26 @@ export class Transaction {
         signer: JsonRpcSigner,
         gasMultiplier: bigint,
     ) {
-        const gasLimit = (await signer.estimateGas(transaction)) * gasMultiplier / 1_000n
-
         return new Transaction(
             {
                 ...transaction,
-                gasLimit,
+                // TODO check if signer.provider sets the from in the transaction
+                gasLimit: await Transaction.estimateGas(
+                    transaction,
+                    signer.provider,
+                    gasMultiplier,
+                ),
             },
             signer,
         )
+    }
+
+    public static async estimateGas(
+        transaction: PreparedTransactionRequest,
+        provider: AbstractProvider,
+        gasMultiplier: bigint,
+    ) {
+        return (await provider.estimateGas(transaction)) * gasMultiplier / 1_000n
     }
 
     /**
