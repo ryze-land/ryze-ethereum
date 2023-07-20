@@ -9,4 +9,13 @@ export enum ChainId {
 
     POLYGON = 137,
     POLYGON_TESTNET = 80001,
+
+    FANTOM = 250,
+    FANTOM_TESTNET = 4002,
+
+    OPTIMISM = 10,
+    OPTIMISM_TESTNET = 420,
+
+    ARBITRUM = 42161,
+    ARBITRUM_TESTNET = 421613,
 }

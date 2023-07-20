@@ -83,4 +83,70 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://mumbai.polygonscan.com/',
         ['https://rpc.ankr.com/polygon_mumbai'],
     ),
+    [ChainId.FANTOM]: new Chain(
+        ChainId.FANTOM,
+        'Fantom Opera',
+        false,
+        {
+            name: 'Fantom',
+            symbol: 'FTM',
+        },
+        'https://ftmscan.com/',
+        ['https://rpc.ftm.tools'],
+    ),
+    [ChainId.FANTOM_TESTNET]: new Chain(
+        ChainId.FANTOM_TESTNET,
+        'Fantom Testnet',
+        true,
+        {
+            name: 'Fantom',
+            symbol: 'FTM',
+        },
+        'https://testnet.ftmscan.com/',
+        ['https://rpc.testnet.fantom.network'],
+    ),
+    [ChainId.OPTIMISM]: new Chain(
+        ChainId.OPTIMISM,
+        'Optimism',
+        false,
+        {
+            name: 'Ether',
+            symbol: 'ETH',
+        },
+        'https://optimistic.etherscan.io/',
+        ['https://mainnet.optimism.io'],
+    ),
+    [ChainId.OPTIMISM_TESTNET]: new Chain(
+        ChainId.OPTIMISM_TESTNET,
+        'Optimism Goerli Testnet',
+        true,
+        {
+            name: 'Ether',
+            symbol: 'ETH',
+        },
+        'https://goerli-optimism.etherscan.io/',
+        ['https://goerli.optimism.io'],
+    ),
+    [ChainId.ARBITRUM]: new Chain(
+        ChainId.ARBITRUM,
+        'Arbitrum One',
+        false,
+        {
+            name: 'Ether',
+            symbol: 'ETH',
+        },
+        'https://arbiscan.io/',
+        ['https://rpc.ankr.com/arbitrum'],
+    ),
+    [ChainId.ARBITRUM_TESTNET]: new Chain(
+        ChainId.ARBITRUM_TESTNET,
+        'Arbitrum Goerli Testnet',
+        true,
+        {
+            name: 'Ether',
+            symbol: 'ETH',
+        },
+        'https://goerli.arbiscan.io/',
+        ['https://arbitrum-goerli.publicnode.com'],
+    ),
 }
