@@ -63,7 +63,7 @@ export const chainRegistry: Record<ChainId, Chain> = {
 
     [ChainId.POLYGON]: new Chain(
         ChainId.POLYGON,
-        'Avalanche Testnet',
+        'Polygon',
         false,
         {
             name: 'Polygon',
