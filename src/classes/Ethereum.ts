@@ -30,7 +30,7 @@ export class Ethereum {
         availableChainIds,
         chainToRpcMap,
         onWalletUpdate,
-        gasMultiplier = 2_000n, // multiplied by 1_000
+        gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
