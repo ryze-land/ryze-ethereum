@@ -17,7 +17,7 @@ export class Transaction {
      * Asynchronously initializes a Transaction instance, with the gas limit determined
      * by applying the provided gas multiplier to the signer's estimated gas limit.
      *
-     * @param transaction - PreparedTransactionRequest object containing transaction details.
+     * @param preparedTransactionRequest - PreparedTransactionRequest object containing transaction details.
      * @param signer - Signer object used to estimate gas and sign the transaction.
      * @param gasMultiplier - A factor used to adjust the estimated gas limit for the transaction.
      *                        The value is represented in thousandths, where 1_000 means no adjustment
@@ -25,13 +25,13 @@ export class Transaction {
      * @returns - A promise that resolves to a new Transaction instance.
      */
     public static async initialize(
-        transaction: PreparedTransactionRequest,
+        preparedTransactionRequest: PreparedTransactionRequest,
         signer: JsonRpcSigner,
         gasMultiplier: bigint,
     ): Promise<Transaction> {
         const from = await signer.getAddress()
         const transactionWithSender = {
-            ...transaction,
+            ...preparedTransactionRequest,
             from,
         }
 
@@ -51,7 +51,7 @@ export class Transaction {
     /**
      * Estimates the gas limit for a transaction using a provider and applies a specified multiplier.
      *
-     * @param transaction - PreparedTransactionRequest object containing transaction details.
+     * @param preparedTransactionRequest - PreparedTransactionRequest object containing transaction details.
      * @param provider - Provider object used to estimate the gas limit.
      * @param gasMultiplier - A factor used to adjust the estimated gas limit for the transaction.
      *                        The value is represented in thousandths, where 1_000 means no adjustment
@@ -59,11 +59,11 @@ export class Transaction {
      * @returns - A promise that resolves to the calculated gas limit.
      */
     public static async estimateGas(
-        transaction: PreparedTransactionRequest,
+        preparedTransactionRequest: PreparedTransactionRequest,
         provider: AbstractProvider,
         gasMultiplier: bigint,
     ): Promise<bigint> {
-        return (await provider.estimateGas(transaction)) * gasMultiplier / 1_000n
+        return (await provider.estimateGas(preparedTransactionRequest)) * gasMultiplier / 1_000n
     }
 
     /**
