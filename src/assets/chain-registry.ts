@@ -85,7 +85,7 @@ export const chainRegistry: Record<ChainId, Chain> = {
     ),
     [ChainId.FANTOM]: new Chain(
         ChainId.FANTOM,
-        'Fantom Opera',
+        'Fantom',
         false,
         {
             name: 'Fantom',
