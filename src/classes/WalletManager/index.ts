@@ -1,13 +1,5 @@
 import detectEthereumProvider from '@metamask/detect-provider'
-import {
-    BrowserProvider,
-    PreparedTransactionRequest,
-    Eip1193Provider,
-    EthersError,
-    JsonRpcSigner,
-    TransactionReceipt,
-    TransactionResponse,
-} from 'ethers'
+import { BrowserProvider, Eip1193Provider, EthersError, JsonRpcSigner } from 'ethers'
 import { chainRegistry } from '../../assets'
 import { ChainId, EthError, WalletApplication } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
@@ -18,14 +10,6 @@ import { WalletInfo, walletInfoSchema } from '../WalletInfo'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
-
-export interface TransactionOptions {
-    onReadyToSign?: () => void,
-    onBroadcast?: (transactionResponse?: TransactionResponse) => void | Promise<void>,
-    onConfirm?: (transactionReceipt?: TransactionReceipt | null) => void | Promise<void>,
-    gasMultiplier?: bigint
-    requiredConfirmations?: number
-}
 
 export type WalletErrorHandler<DataType> = (data: DataType) => void | Promise<void>
 
@@ -265,58 +249,6 @@ export class WalletManager {
                 e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
             )
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
-        }
-    }
-
-    /**
-     * Sends a transaction through the current wallet.
-     *
-     * This function sends a transaction to the Ethereum network using the signer returned by `getSigner()`.
-     * Before sending, the function estimates the gas limit for the transaction and multiplies it by the `gasMultiplier` parameter.
-     *
-     * It provides optional callbacks for when the transaction is sent and when it is confirmed.
-     *
-     * @param {PreparedTransactionRequest} transaction - The transaction to be sent.
-     * @param {TransactionOptions} options - The transaction options, including optional callbacks and gas settings.
-     *
-     * `onReadyToSign`: An optional callback function that will be called once the transaction is prepared and ready to sign.
-     * `onBroadcast`: An optional callback function that will be called with the transaction response immediately after the transaction is broadcast to the network.
-     * `onConfirm`: An optional callback function that will be called with the transaction receipt after the transaction is confirmed.
-     * `gasMultiplier`: A multiplier for the estimated gas limit, defaults to 2.
-     * `requiredConfirmations`: The number of confirmations required before considering the transaction confirmed. Default is 1.
-     *
-     * @throws {Error} - Throws an error if no wallet information is available, or the chain is unsupported.
-     *
-     * @returns {Promise<void>} - Returns a promise that resolves when the transaction is sent and all callbacks have been processed.
-     */
-    public async sendTransaction(
-        transaction: PreparedTransactionRequest,
-        {
-            onReadyToSign,
-            onBroadcast,
-            onConfirm,
-            gasMultiplier = 2n,
-            requiredConfirmations = 1,
-        }: TransactionOptions = {},
-    ): Promise<void> {
-        const chainId = this._walletInfo?.chainId
-
-        if (!chainId)
-            throw new Error(EthError.UNSUPPORTED_CHAIN)
-
-        const signer = await this.getSigner()
-        const gasLimit = (await signer.estimateGas(transaction)) * gasMultiplier
-
-        onReadyToSign?.()
-
-        const transactionResponse = await signer.sendTransaction({ ...transaction, gasLimit })
-
-        await onBroadcast?.(transactionResponse)
-
-        if (requiredConfirmations) {
-            const receipt = await transactionResponse.wait(requiredConfirmations)
-
-            await onConfirm?.(receipt)
         }
     }
 
