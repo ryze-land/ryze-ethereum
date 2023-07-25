@@ -4,11 +4,11 @@ export class Transaction {
     /**
      * Constructs a new Transaction instance.
      *
-     * @param transaction - PreparedTransactionRequest object containing transaction details.
+     * @param preparedTransactionRequest - PreparedTransactionRequest object containing transaction details.
      * @param signer - Signer object to sign and send the transaction.
      */
     public constructor(
-        public readonly transaction: PreparedTransactionRequest,
+        public readonly preparedTransactionRequest: PreparedTransactionRequest,
         public readonly signer: JsonRpcSigner,
     ) {
     }
@@ -72,7 +72,7 @@ export class Transaction {
      * @returns - A promise that resolves to the transaction receipt upon successful transaction.
      */
     public send() {
-        return this.signer.sendTransaction(this.transaction)
+        return this.signer.sendTransaction(this.preparedTransactionRequest)
     }
 
     /**
@@ -85,7 +85,7 @@ export class Transaction {
      */
     public call(overrides: PreparedTransactionRequest = {}) {
         return this.signer.call({
-            ...this.transaction,
+            ...this.preparedTransactionRequest,
             ...overrides,
         })
     }
