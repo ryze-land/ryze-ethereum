@@ -4,10 +4,10 @@ import {
     boolean as zodBoolean,
     nativeEnum as zodNativeEnum,
 } from 'zod'
-import { ChainId, WalletApplication } from '../enums'
+import { ChainId } from '../enums'
 
 export const walletInfoSchema = zodObject({
-    application: zodNativeEnum(WalletApplication).nullable(),
+    walletConnectorId: zodString().nullable(),
     chainId: zodNativeEnum(ChainId).nullable(),
     address: zodString(),
     connected: zodBoolean(),
@@ -15,7 +15,7 @@ export const walletInfoSchema = zodObject({
 
 export class WalletInfo {
     constructor(
-        public readonly application: WalletApplication | null,
+        public readonly walletConnectorId: string | null,
         public readonly chainId: ChainId | null,
         public readonly address: string,
         public readonly connected: boolean,
@@ -24,7 +24,7 @@ export class WalletInfo {
 
     public withAddress(address: string): WalletInfo {
         return new WalletInfo(
-            this.application,
+            this.walletConnectorId,
             this.chainId,
             address,
             this.connected,
@@ -33,7 +33,7 @@ export class WalletInfo {
 
     public withChain(chain: ChainId | null): WalletInfo {
         return new WalletInfo(
-            this.application,
+            this.walletConnectorId,
             chain,
             this.address,
             this.connected,

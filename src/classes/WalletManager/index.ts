@@ -1,12 +1,12 @@
-import detectEthereumProvider from '@metamask/detect-provider'
 import { BrowserProvider, Eip1193Provider, EthersError, JsonRpcSigner } from 'ethers'
 import { chainRegistry } from '../../assets'
-import { ChainId, EthError, WalletApplication } from '../../enums'
+import { ChainId, EthError } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { numberToHex } from '../../helpers'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
+import { type WalletConnector } from '../WalletConnectors'
 import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
@@ -19,7 +19,7 @@ export interface WalletErrorHandlers {
 }
 
 export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
-    onProviderUnavailable?: WalletErrorHandler<WalletApplication>
+    onProviderUnavailable?: WalletErrorHandler<string>
 }
 
 // TODO: must test interactions with all added wallet providers
@@ -37,7 +37,7 @@ export class WalletManager {
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: MetaMaskEthereumProvider | null = null
     private _walletInfo: WalletInfo | null = null
-    private _currentWalletApplication: WalletApplication | null = null
+    private _currentWalletConnectorId: string | null = null
     private _initializedEvents = false
 
     /**
@@ -50,6 +50,7 @@ export class WalletManager {
     constructor(
         public readonly defaultChainId: ChainId,
         public readonly availableChainIds: ChainId[],
+        private readonly _connectors: WalletConnector[],
         private readonly _onWalletUpdate?: OnWalletUpdate,
     ) {
         this._storage = new LocalStorage<WalletInfo | null>(
@@ -58,7 +59,7 @@ export class WalletManager {
                 const json = walletInfoSchema.parse(JSON.parse(storedValue))
 
                 return new WalletInfo(
-                    json.application,
+                    json.walletConnectorId,
                     json.chainId,
                     json.address,
                     json.connected,
@@ -76,20 +77,20 @@ export class WalletManager {
      * @returns {Promise<void>}
      */
     public async connect(
-        walletApplication: WalletApplication,
+        walletConnector: WalletConnector,
         walletErrorHandlers?: ConnectWalletErrorHandlers,
     ): Promise<void> {
-        const provider = await detectEthereumProvider<MetaMaskEthereumProvider>()
+        const provider = await walletConnector.getProvider()
 
         if (!provider) {
             if (walletErrorHandlers?.onProviderUnavailable)
-                return walletErrorHandlers.onProviderUnavailable(walletApplication)
+                return walletErrorHandlers.onProviderUnavailable(walletConnector.id)
 
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
         }
 
         try {
-            this._currentWalletApplication = walletApplication
+            this._currentWalletConnectorId = walletConnector.id
             this._nativeProvider = provider
             this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider, 'any')
 
@@ -105,7 +106,7 @@ export class WalletManager {
                 this._getWalletAddress(),
             ])
 
-            this.walletInfo = new WalletInfo(walletApplication, chainId, address, true)
+            this.walletInfo = new WalletInfo(walletConnector.id, chainId, address, true)
         }
         catch (e) {
             return this._handleWalletErrors(e, walletErrorHandlers)
@@ -123,14 +124,17 @@ export class WalletManager {
 
         if (walletInfo) {
             this.walletInfo = new WalletInfo(
-                walletInfo.application,
+                walletInfo.walletConnectorId,
                 walletInfo.chainId,
                 walletInfo.address,
                 false,
             )
 
-            if (walletInfo.application)
-                return await this.connect(walletInfo.application, walletErrorHandlers)
+            if (walletInfo.walletConnectorId) {
+                const walletConnector = this._getConnector(walletInfo.walletConnectorId)
+
+                return await this.connect(walletConnector, walletErrorHandlers)
+            }
         }
 
         // TODO maybe switch to persisted chain and address
@@ -357,13 +361,13 @@ export class WalletManager {
      */
     private async _updateAddress(addresses: string[]): Promise<void> {
         const address = addresses[0]
-        const walletApplication = this._walletInfo?.application || this._currentWalletApplication
+        const walletConnectorId = this._walletInfo?.walletConnectorId || this._currentWalletConnectorId
 
-        if (address && walletApplication) {
+        if (address && walletConnectorId) {
             const chain = this._walletInfo?.chainId || await this._getWalletChainId()
 
             this.walletInfo = new WalletInfo(
-                walletApplication,
+                walletConnectorId,
                 chain,
                 addresses[0],
                 true,
@@ -400,5 +404,19 @@ export class WalletManager {
      */
     private _addEventListener<T>(event: string, callback: (response: T) => void) {
         return this._nativeProvider?.on?.(event, response => callback.bind(this)(response))
+    }
+
+    /**
+     * Retrieves the Wallet connector by his ID.
+     *
+     * @returns {WalletConnector} - Returns the Wallet connector listed inside connectors array.
+     */
+    private _getConnector(connectorId: string): WalletConnector {
+        const connector = this._connectors.find(connector => connector.id === connectorId)
+
+        if (!connector)
+            throw new Error('Wallet connector not found! Make sure that you have registered it')
+
+        return connector
     }
 }
