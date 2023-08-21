@@ -77,9 +77,10 @@ export class WalletManager {
      * @returns {Promise<void>}
      */
     public async connect(
-        walletConnector: WalletConnector,
+        walletConnectorId: string,
         walletErrorHandlers?: ConnectWalletErrorHandlers,
     ): Promise<void> {
+        const walletConnector = this._getConnector(walletConnectorId)
         const provider = await walletConnector.getProvider()
 
         if (!provider) {
@@ -130,11 +131,8 @@ export class WalletManager {
                 false,
             )
 
-            if (walletInfo.walletConnectorId) {
-                const walletConnector = this._getConnector(walletInfo.walletConnectorId)
-
-                return await this.connect(walletConnector, walletErrorHandlers)
-            }
+            if (walletInfo.walletConnectorId)
+                return await this.connect(walletInfo.walletConnectorId, walletErrorHandlers)
         }
 
         // TODO maybe switch to persisted chain and address
