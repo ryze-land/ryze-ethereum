@@ -413,7 +413,7 @@ export class WalletManager {
         const connector = this._connectors.find(connector => connector.id === connectorId)
 
         if (!connector)
-            throw new Error('Wallet connector not found! Make sure that you have registered it')
+            throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
         return connector
     }
