@@ -22,20 +22,6 @@ export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
     onProviderUnavailable?: WalletErrorHandler<string>
 }
 
-interface WalletManagerParams {
-    /** The default blockchain network to connect to. */
-    defaultChainId: ChainId
-
-    /** An array of available blockchain networks for connection. */
-    availableChainIds: ChainId[]
-
-    /** An array of available wallet connectors. */
-    connectors?: WalletConnector[]
-
-    /** Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect. */
-    onWalletUpdate?: OnWalletUpdate
-}
-
 /**
  * WalletProvider
  *
@@ -54,12 +40,25 @@ export class WalletManager {
     private _initializedEvents = false
     private _connectors: Record<string, WalletConnector> = {}
 
+    /**
+     * Constructs a WalletManager instance to provide an interface for interacting with a web3 wallet.
+     *
+     * @param defaultChainId - The default blockchain network ID to connect to.
+     * @param availableChainIds - List of available blockchain network IDs for connection.
+     * @param connectors=defaultWalletConnectors - Available wallet connectors.
+     * @param onWalletUpdate - Callback to be executed when wallet updates, such as a change in the address, chain, or disconnect event.
+     */
     constructor({
         defaultChainId,
         availableChainIds,
         connectors = defaultWalletConnectors,
         onWalletUpdate,
-    }: WalletManagerParams) {
+    }: {
+        defaultChainId: ChainId
+        availableChainIds: ChainId[]
+        connectors?: WalletConnector[]
+        onWalletUpdate?: OnWalletUpdate
+    }) {
         this.defaultChainId = defaultChainId
         this.availableChainIds = availableChainIds
         this._onWalletUpdate = onWalletUpdate
