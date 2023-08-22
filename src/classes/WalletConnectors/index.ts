@@ -1,7 +1,5 @@
-export { WalletConnector } from './WalletConnector'
-
-export { BrowserConnector } from './BrowserConnector'
-export type { WindowProvider } from './BrowserConnector'
+export * from './WalletConnector'
+export * from './BrowserConnector'
 
 export { BitgetWallet } from './BitgetWallet'
 export { MetaMaskWallet } from './Metamask'
