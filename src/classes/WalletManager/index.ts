@@ -39,18 +39,20 @@ export class WalletManager {
     private _walletInfo: WalletInfo | null = null
     private _currentWalletConnectorId: string | null = null
     private _initializedEvents = false
+    private _connectors: Record<string, WalletConnector> = {}
 
     /**
      * Constructs a WalletProvider instance.
      *
      * @param defaultChainId - The default blockchain network to connect to.
      * @param availableChainIds - An array of available blockchain networks for connection.
+     * @param _connectors - An object of wallet connectors mapped by their IDs.
      * @param _onWalletUpdate - Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect.
      */
     constructor(
         public readonly defaultChainId: ChainId,
         public readonly availableChainIds: ChainId[],
-        private readonly _connectors: WalletConnector[],
+        connectors: WalletConnector[],
         private readonly _onWalletUpdate?: OnWalletUpdate,
     ) {
         this._storage = new LocalStorage<WalletInfo | null>(
@@ -66,6 +68,8 @@ export class WalletManager {
                 )
             },
         )
+
+        connectors.forEach(connector => this._connectors[connector.id] = connector)
     }
 
     /**
@@ -80,7 +84,11 @@ export class WalletManager {
         walletConnectorId: string,
         walletErrorHandlers?: ConnectWalletErrorHandlers,
     ): Promise<void> {
-        const walletConnector = this._getConnector(walletConnectorId)
+        const walletConnector = this._connectors[walletConnectorId]
+
+        if (!walletConnector)
+            throw new Error(EthError.PROVIDER_UNAVAILABLE)
+
         const provider = await walletConnector.getProvider()
 
         if (!provider) {
@@ -402,19 +410,5 @@ export class WalletManager {
      */
     private _addEventListener<T>(event: string, callback: (response: T) => void) {
         return this._nativeProvider?.on?.(event, response => callback.bind(this)(response))
-    }
-
-    /**
-     * Retrieves the Wallet connector by his ID.
-     *
-     * @returns {WalletConnector} - Returns the Wallet connector listed inside connectors array.
-     */
-    private _getConnector(connectorId: string): WalletConnector {
-        const connector = this._connectors.find(connector => connector.id === connectorId)
-
-        if (!connector)
-            throw new Error(EthError.PROVIDER_UNAVAILABLE)
-
-        return connector
     }
 }

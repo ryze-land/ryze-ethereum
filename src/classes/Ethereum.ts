@@ -36,7 +36,7 @@ export class Ethereum {
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
-        connectors: WalletConnector[]
+        connectors: WalletConnector[],
         chainToRpcMap?: Partial<Record<ChainId, string[]>>
         onWalletUpdate?: OnWalletUpdate
         gasMultiplier?: bigint
