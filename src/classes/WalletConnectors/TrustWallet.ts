@@ -5,12 +5,11 @@ export class TrustWallet extends BrowserConnector {
     public readonly name: string = 'Trust Wallet'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window<{ trustwallet?: WindowProvider }>()
 
-        const { ethereum, trustwallet } = (window as unknown as {
-            ethereum?: WindowProvider,
-            trustwallet?: WindowProvider
-        })
+        if (!window) return
+
+        const { ethereum, trustwallet } = window
 
         if (ethereum?.providers)
             return ethereum.providers.find(ethereum => ethereum.isTrust)

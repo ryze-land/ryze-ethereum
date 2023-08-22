@@ -14,13 +14,18 @@ export class BrowserConnector extends WalletConnector<WindowProvider | undefined
     public readonly name: string = 'Browser Wallet'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window()
 
-        const ethereum = (window as unknown as { ethereum?: WindowProvider })
-            .ethereum
+        if (!window) return
+
+        const ethereum = window.ethereum
 
         if (ethereum?.providers) return ethereum.providers[0]
 
         return ethereum
+    }
+
+    protected _window<T>() {
+        return window as unknown as ({ ethereum?: WindowProvider } & T) | undefined
     }
 }

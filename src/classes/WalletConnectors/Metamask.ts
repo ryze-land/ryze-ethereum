@@ -1,13 +1,15 @@
-import { BrowserConnector, type WindowProvider } from './BrowserConnector'
+import { BrowserConnector } from './BrowserConnector'
 
 export class MetaMaskWallet extends BrowserConnector {
     public readonly id = 'metamask'
     public readonly name: string = 'MetaMask'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window()
 
-        const { ethereum } = (window as unknown as { ethereum?: WindowProvider })
+        if (!window) return
+
+        const ethereum = window.ethereum
 
         if (ethereum?.providers)
             return ethereum.providers.find(_ethereum => _ethereum?.isMetaMask)

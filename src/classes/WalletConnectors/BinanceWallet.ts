@@ -5,10 +5,8 @@ export class BinanceWallet extends BrowserConnector {
     public readonly name: string = 'Binance Wallet'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window<{ BinanceChain?: WindowProvider }>()
 
-        const { BinanceChain } = (window as unknown as { BinanceChain?: WindowProvider })
-
-        return BinanceChain
+        return window?.BinanceChain
     }
 }

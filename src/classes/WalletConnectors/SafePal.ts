@@ -1,13 +1,15 @@
-import { BrowserConnector, type WindowProvider } from './BrowserConnector'
+import { BrowserConnector } from './BrowserConnector'
 
 export class SafePalWallet extends BrowserConnector {
     public readonly id: string = 'safepalwallet'
     public readonly name: string = 'SafePal Wallet'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window()
 
-        const { ethereum } = (window as unknown as { ethereum?: WindowProvider })
+        if (!window) return
+
+        const ethereum = window.ethereum
 
         if (ethereum?.providers)
             return ethereum.providers.find(_ethereum => _ethereum?.isSafePal)

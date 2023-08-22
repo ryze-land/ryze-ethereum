@@ -6,12 +6,11 @@ export class BitgetWallet extends BrowserConnector {
     public readonly name: string = 'Bitget Wallet'
 
     public getProvider() {
-        if (typeof window === 'undefined') return
+        const window = this._window<{ bitkeep?: { ethereum: WindowProvider } }>()
 
-        const { bitkeep, ethereum } = (window as unknown as {
-            ethereum?: WindowProvider
-            bitkeep?: { ethereum: WindowProvider }
-        })
+        if (!window) return
+
+        const { bitkeep, ethereum } = window
 
         if (ethereum?.providers)
             return ethereum.providers.find(_ethereum => _ethereum.isBitKeep)
