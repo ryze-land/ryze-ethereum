@@ -36,14 +36,14 @@ export class Ethereum {
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
-        connectors: WalletConnector[],
+        connectors?: WalletConnector[],
         chainToRpcMap?: Partial<Record<ChainId, string[]>>
         onWalletUpdate?: OnWalletUpdate
         gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
         this.availableChainIds = availableChainIds
-        this.walletManager = new WalletManager(defaultChainId, availableChainIds, connectors, onWalletUpdate)
+        this.walletManager = new WalletManager({ defaultChainId, availableChainIds, connectors, onWalletUpdate })
         this.gasMultiplier = gasMultiplier
 
         this._providers = Chain.createChainMap({

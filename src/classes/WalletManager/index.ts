@@ -22,10 +22,19 @@ export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
     onProviderUnavailable?: WalletErrorHandler<string>
 }
 
-// TODO: must test interactions with all added wallet providers
-// Tested wallet providers:
-// - Metamask
-// - TrustWallet
+interface WalletManagerParams {
+    /** The default blockchain network to connect to. */
+    defaultChainId: ChainId
+
+    /** An array of available blockchain networks for connection. */
+    availableChainIds: ChainId[]
+
+    /** An array of available wallet connectors. */
+    connectors?: WalletConnector[]
+
+    /** Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect. */
+    onWalletUpdate?: OnWalletUpdate
+}
 
 /**
  * WalletProvider
@@ -33,6 +42,10 @@ export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
  * This class provides an interface for interacting with a web3 wallet, such as MetaMask.
  */
 export class WalletManager {
+    public readonly defaultChainId: ChainId
+    public readonly availableChainIds: ChainId[]
+
+    private readonly _onWalletUpdate?: OnWalletUpdate
     private readonly _storage: LocalStorage<WalletInfo | null>
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: MetaMaskEthereumProvider | null = null
@@ -41,20 +54,16 @@ export class WalletManager {
     private _initializedEvents = false
     private _connectors: Record<string, WalletConnector> = {}
 
-    /**
-     * Constructs a WalletProvider instance.
-     *
-     * @param defaultChainId - The default blockchain network to connect to.
-     * @param availableChainIds - An array of available blockchain networks for connection.
-     * @param _connectors - An object of wallet connectors mapped by their IDs.
-     * @param _onWalletUpdate - Callback to be executed on wallet updates, such as a change in the address, chain, or a disconnect.
-     */
-    constructor(
-        public readonly defaultChainId: ChainId,
-        public readonly availableChainIds: ChainId[],
-        connectors: WalletConnector[],
-        private readonly _onWalletUpdate?: OnWalletUpdate,
-    ) {
+    constructor({
+        defaultChainId,
+        availableChainIds,
+        connectors,
+        onWalletUpdate,
+    }: WalletManagerParams) {
+        this.defaultChainId = defaultChainId
+        this.availableChainIds = availableChainIds
+        this._onWalletUpdate = onWalletUpdate
+
         this._storage = new LocalStorage<WalletInfo | null>(
             'ethereum-wallet-info',
             storedValue => {
