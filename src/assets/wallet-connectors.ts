@@ -1,5 +1,4 @@
 import {
-    BinanceWallet,
     BitgetWallet,
     MetaMaskWallet,
     SafePalWallet,
@@ -7,9 +6,8 @@ import {
 } from '../classes'
 
 export const defaultWalletConnectors = [
-    new MetaMaskWallet(),
-    new BitgetWallet(),
-    new SafePalWallet(),
-    new TrustWallet(),
-    new BinanceWallet(),
+    new MetaMaskWallet({ icon: icons.metamask }),
+    new BitgetWallet({ icon: icons.bitkeep }),
+    new SafePalWallet({ icon: icons.safepal }),
+    new TrustWallet({ icon: icons.trustwallet }),
 ]
