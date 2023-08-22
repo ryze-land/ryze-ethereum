@@ -6,11 +6,11 @@ export abstract class WalletConnector<Provider = any> {
     public abstract readonly id: string
     /** Wallet connector name */
     public abstract readonly name: string
-    /** Wallet connector image */
-    public readonly image?: string
+    /** Wallet connector icon */
+    public readonly icon?: string
 
-    constructor(config?: { image: string }) {
-        this.image = config?.image
+    constructor(config?: { icon: string }) {
+        this.icon = config?.icon
     }
 
     /**
