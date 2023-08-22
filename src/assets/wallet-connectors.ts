@@ -4,6 +4,7 @@ import {
     SafePalWallet,
     TrustWallet,
 } from '../classes'
+import { icons } from './icons/icons'
 
 export const defaultWalletConnectors = [
     new MetaMaskWallet({ icon: icons.metamask }),
