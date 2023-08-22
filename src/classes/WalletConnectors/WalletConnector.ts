@@ -6,6 +6,12 @@ export abstract class WalletConnector<Provider = any> {
     public abstract readonly id: string
     /** Wallet connector name */
     public abstract readonly name: string
+    /** Wallet connector image */
+    public readonly image?: string
+
+    constructor(config?: { image: string }) {
+        this.image = config?.image
+    }
 
     /**
      * Gets the required provider to interact with the user Wallet.
