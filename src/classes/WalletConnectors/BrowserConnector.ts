@@ -6,6 +6,7 @@ export interface WindowProvider extends Eip1193Provider {
     isTrust?: boolean
     isSafePal?: boolean
     isBitKeep?: boolean
+    isCoinbaseWallet?: boolean
     providers?: WindowProvider[]
 }
 
