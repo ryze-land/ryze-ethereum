@@ -1,5 +1,5 @@
 import { BrowserProvider, Eip1193Provider, EthersError, JsonRpcSigner } from 'ethers'
-import { chainRegistry } from '../../assets'
+import { chainRegistry, defaultWalletConnectors } from '../../assets'
 import { ChainId, EthError } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { numberToHex } from '../../helpers'
@@ -57,7 +57,7 @@ export class WalletManager {
     constructor({
         defaultChainId,
         availableChainIds,
-        connectors,
+        connectors = defaultWalletConnectors,
         onWalletUpdate,
     }: WalletManagerParams) {
         this.defaultChainId = defaultChainId
