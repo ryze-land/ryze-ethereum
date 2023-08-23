@@ -5,6 +5,7 @@ import { Chain } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
+import { type WalletConnector } from './WalletConnectors'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
@@ -28,19 +29,21 @@ export class Ethereum {
     constructor({
         defaultChainId,
         availableChainIds,
+        connectors,
         chainToRpcMap,
         onWalletUpdate,
         gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
+        connectors?: WalletConnector[],
         chainToRpcMap?: Partial<Record<ChainId, string[]>>
         onWalletUpdate?: OnWalletUpdate
         gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
         this.availableChainIds = availableChainIds
-        this.walletManager = new WalletManager(defaultChainId, availableChainIds, onWalletUpdate)
+        this.walletManager = new WalletManager({ defaultChainId, availableChainIds, connectors, onWalletUpdate })
         this.gasMultiplier = gasMultiplier
 
         this._providers = Chain.createChainMap({
