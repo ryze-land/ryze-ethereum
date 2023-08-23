@@ -1,7 +1,9 @@
+import { EIP1193Provider } from '../WalletManager/eip1193Provider'
+
 /**
  * An abstract class that provides the interface to implement a Wallet Connector.
  */
-export abstract class WalletConnector<Provider = any> {
+export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provider> {
     /** Unique wallet connector id */
     public abstract readonly id: string
     /** Wallet connector name */
@@ -18,7 +20,7 @@ export abstract class WalletConnector<Provider = any> {
      *
      * The provider should follow the same API as [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193)
      *
-     * @returns {Provider | Promise<Provider>}
+     * @returns {T | undefined | Promise<T | undefined>}
      */
-    public abstract getProvider(): Provider | Promise<Provider>
+    public abstract getProvider(): T | undefined | Promise<T | undefined>
 }

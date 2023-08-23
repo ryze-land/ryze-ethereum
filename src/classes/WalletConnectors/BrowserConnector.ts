@@ -1,7 +1,7 @@
-import { type Eip1193Provider } from 'ethers'
+import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { WalletConnector } from './WalletConnector'
 
-export interface WindowProvider extends Eip1193Provider {
+export interface WindowProvider extends EIP1193Provider {
     isMetaMask?: boolean
     isTrust?: boolean
     isSafePal?: boolean
@@ -10,7 +10,7 @@ export interface WindowProvider extends Eip1193Provider {
     providers?: WindowProvider[]
 }
 
-export class BrowserConnector extends WalletConnector<WindowProvider | undefined> {
+export class BrowserConnector extends WalletConnector<WindowProvider> {
     public readonly id: string = 'browserConnector'
     public readonly name: string = 'Browser Wallet'
 
