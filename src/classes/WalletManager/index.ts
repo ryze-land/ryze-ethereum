@@ -1,4 +1,4 @@
-import { BrowserProvider, Eip1193Provider, EthersError, JsonRpcSigner } from 'ethers'
+import { BrowserProvider, EthersError, JsonRpcSigner } from 'ethers'
 import { chainRegistry, defaultWalletConnectors } from '../../assets'
 import { ChainId, EthError } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
@@ -109,7 +109,7 @@ export class WalletManager {
         try {
             this._currentWalletConnectorId = walletConnector.id
             this._nativeProvider = provider
-            this._wrappedProvider = new BrowserProvider(this._nativeProvider as Eip1193Provider, 'any')
+            this._wrappedProvider = new BrowserProvider(this._nativeProvider, 'any')
 
             if (!this._initializedEvents) {
                 this._addEventListener('accountsChanged', this._updateAddress)
