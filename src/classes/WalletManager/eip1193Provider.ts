@@ -1,8 +1,3 @@
-export interface RequestArguments {
-    method: string
-    params?: unknown[] | Record<string, unknown>
-}
-
 export interface EIP1193Provider {
     on(eventName: string | symbol, listener: (...args: any[]) => void): this
 
@@ -12,5 +7,5 @@ export interface EIP1193Provider {
 
     removeAllListeners(event?: string | symbol): this
 
-    request<T>(args: RequestArguments): Promise<T>
+    request<T>(args: { method: string, params?: unknown[] | Record<string, unknown> }): Promise<T>
 }
