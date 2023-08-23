@@ -7,7 +7,7 @@ import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
 import { type WalletConnector } from '../WalletConnectors'
-import { MetaMaskEthereumProvider } from './MetamaskEthereumProvider'
+import { EIP1193Provider } from './eip1193Provider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
 
@@ -34,7 +34,7 @@ export class WalletManager {
     private readonly _onWalletUpdate?: OnWalletUpdate
     private readonly _storage: LocalStorage<WalletInfo | null>
     private _wrappedProvider: BrowserProvider | null = null
-    private _nativeProvider: MetaMaskEthereumProvider | null = null
+    private _nativeProvider: EIP1193Provider | null = null
     private _walletInfo: WalletInfo | null = null
     private _currentWalletConnectorId: string | null = null
     private _initializedEvents = false

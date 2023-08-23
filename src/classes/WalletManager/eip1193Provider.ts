@@ -3,14 +3,8 @@ export interface RequestArguments {
     params?: unknown[] | Record<string, unknown>
 }
 
-export interface MetaMaskEthereumProvider {
-    isMetaMask?: boolean
-
-    once(eventName: string | symbol, listener: (...args: any[]) => void): this
-
+export interface EIP1193Provider {
     on(eventName: string | symbol, listener: (...args: any[]) => void): this
-
-    off(eventName: string | symbol, listener: (...args: any[]) => void): this
 
     addListener(eventName: string | symbol, listener: (...args: any[]) => void): this
 
