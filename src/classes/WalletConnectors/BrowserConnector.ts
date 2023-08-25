@@ -1,4 +1,8 @@
+import { BrowserProvider } from 'ethers'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
+import { numberToHex } from '../../helpers'
+import { ProviderErrorCode, isEthersError, isProviderError } from '../../errors'
+import { ChainId, EthError } from '../../enums'
 import { WalletConnector } from './WalletConnector'
 
 export interface WindowProvider extends EIP1193Provider {
@@ -24,6 +28,46 @@ export class BrowserConnector extends WalletConnector<WindowProvider> {
         if (ethereum?.providers) return ethereum.providers[0]
 
         return ethereum
+    }
+
+    public async setChain(chainId: ChainId, provider: BrowserProvider): Promise<void> {
+        try {
+            await this.request(
+                provider,
+                'wallet_switchEthereumChain',
+                [{ chainId: numberToHex(chainId) }],
+            )
+        }
+        catch (e) {
+            if (isEthersError(e) && isProviderError(e.error)) {
+                // In case the chain is not registered in the user's wallet
+                if (e.error.code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
+                    e.error.code === ProviderErrorCode.INTERNAL)
+                    return await this.addChain(chainId, provider)
+            }
+
+            throw e
+        }
+    }
+
+    public async addChain(chainId: ChainId, provider: BrowserProvider): Promise<void> {
+        try {
+            await this.request(
+                provider,
+                'wallet_addEthereumChain',
+                [this._getAddChainParams(chainId)],
+            )
+
+            return await this.setChain(chainId, provider)
+        }
+        catch (e) {
+            if (
+                isEthersError(e) &&
+                isProviderError(e.error) &&
+                e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
+            )
+                throw new Error(EthError.REQUEST_ALREADY_PENDING)
+        }
     }
 
     protected _window<T>() {
