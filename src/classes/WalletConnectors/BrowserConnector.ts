@@ -67,6 +67,8 @@ export class BrowserConnector extends WalletConnector<WindowProvider> {
                 e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
             )
                 throw new Error(EthError.REQUEST_ALREADY_PENDING)
+
+            throw e
         }
     }
 
