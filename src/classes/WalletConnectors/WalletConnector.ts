@@ -44,10 +44,23 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      */
     public abstract addChain(chainId: ChainId, provider?: BrowserProvider): Promise<void>
 
+    /**
+     * Sends a request to the provider.
+     *
+     * @param {BrowserProvider} provider The ethereum provider.
+     * @param {string} method The method to be called on the provider,
+     * @param {any[] | | Record<string, any>} params An optional array or object containing any associated parameters.
+     */
     public request(provider: BrowserProvider, method: string, params?: any[] | Record<string, any>): Promise<any> {
         return provider.send(method, params || [])
     }
 
+    /**
+     * Gets the object params to call `wallet_addEthereumChain`.
+     *
+     * @param chainId The chain ID to retrieve the corresponding chain info.
+     * @returns An object containing the params to call `wallet_addEthereumChain`.
+     */
     protected _getAddChainParams(chainId: ChainId) {
         const chainInfo = chainRegistry[chainId]
 
