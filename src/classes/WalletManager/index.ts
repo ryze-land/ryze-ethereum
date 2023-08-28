@@ -1,8 +1,7 @@
 import { BrowserProvider, EthersError, JsonRpcSigner } from 'ethers'
-import { chainRegistry, defaultWalletConnectors } from '../../assets'
+import { defaultWalletConnectors } from '../../assets'
 import { ChainId, EthError } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
-import { numberToHex } from '../../helpers'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
@@ -214,59 +213,17 @@ export class WalletManager {
     ): Promise<void> {
         const walletInfo = this._walletInfo
 
-        if (!walletInfo?.address || !walletInfo?.connected)
+        if (walletInfo?.chainId === chainId)
+            return
+
+        if (!walletInfo?.address || !walletInfo?.connected || !walletInfo.walletConnectorId || !this._wrappedProvider)
             throw new Error(EthError.SIGNER_UNAVAILABLE)
 
-        if (walletInfo?.chainId === chainId)
-            throw new Error(EthError.INVALID_REQUEST)
-
         try {
-            await this.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: numberToHex(chainId) }],
-            })
+            await this._connectors[walletInfo.walletConnectorId].setChain(chainId, this._wrappedProvider)
         }
         catch (e) {
-            if (isEthersError(e) && isProviderError(e.error)) {
-                // In case the chain is not registered in the user's wallet
-                if (e.error.code === ProviderErrorCode.MISSING_REQUESTED_CHAIN ||
-                    e.error.code === ProviderErrorCode.INTERNAL)
-                    return await this.addChain(chainId)
-            }
-
             return this._handleWalletErrors(e, walletErrorHandlers)
-        }
-    }
-
-    public async addChain(chainId: ChainId): Promise<void> {
-        const chainInfo = chainRegistry[chainId]
-
-        try {
-            await this.request({
-                method: 'wallet_addEthereumChain',
-                params: [
-                    {
-                        chainId: numberToHex(chainInfo.id),
-                        chainName: chainInfo.name,
-                        nativeCurrency: {
-                            ...chainInfo.currency,
-                            decimals: 18,
-                        },
-                        rpcUrls: chainInfo.rpcList,
-                        blockExplorerUrls: [chainInfo.explorer],
-                    },
-                ],
-            })
-
-            return await this.setChain(chainId)
-        }
-        catch (e) {
-            if (
-                isEthersError(e) &&
-                isProviderError(e.error) &&
-                e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
-            )
-                throw new Error(EthError.REQUEST_ALREADY_PENDING)
         }
     }
 
