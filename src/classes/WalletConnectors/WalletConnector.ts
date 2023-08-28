@@ -1,4 +1,5 @@
-import { BrowserProvider } from 'ethers'
+import type { BrowserProvider } from 'ethers'
+import type { EthereumProvider as WalletConnectProvider } from '@walletconnect/ethereum-provider/dist/types/EthereumProvider'
 import { ChainId } from '../../enums'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { chainRegistry } from '../../assets'
@@ -34,7 +35,7 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {BrowserProvider} provider The ethereum provider.
      * @param {number} chainId The chain ID to set.
      */
-    public abstract setChain(chainId: ChainId, provider?: BrowserProvider): Promise<void>
+    public abstract setChain(chainId: ChainId, provider?: BrowserProvider | WalletConnectProvider): Promise<void>
 
     /**
      * Requests the provider to add the chain ID.
@@ -42,7 +43,7 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {BrowserProvider} provider The ethereum provider.
      * @param {number} chainId The chain ID to set.
      */
-    public abstract addChain(chainId: ChainId, provider?: BrowserProvider): Promise<void>
+    public abstract addChain(chainId: ChainId, provider?: BrowserProvider | WalletConnectProvider): Promise<void>
 
     /**
      * Sends a request to the provider.
@@ -51,8 +52,10 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {string} method The method to be called on the provider,
      * @param {any[] | | Record<string, any>} params An optional array or object containing any associated parameters.
      */
-    public request(provider: BrowserProvider, method: string, params?: any[] | Record<string, any>): Promise<any> {
-        return provider.send(method, params || [])
+    public request(provider: BrowserProvider | WalletConnectProvider, method: string, params?: any[] | Record<string, any>): Promise<any> {
+        return 'request' in provider
+            ? provider.request({ method, params })
+            : provider.send(method, params || [])
     }
 
     /**
