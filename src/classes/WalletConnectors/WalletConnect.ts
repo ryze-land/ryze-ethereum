@@ -1,8 +1,10 @@
-import type { EthereumProviderOptions, EthereumProvider as WalletConnectProvider } from '@walletconnect/ethereum-provider/dist/types/EthereumProvider'
+import type WalletConnectProvider from '@walletconnect/ethereum-provider'
 import { icons } from '../../assets/icons/icons'
 import { ChainId, EthError } from '../../enums'
 import { numberToHex } from '../../helpers'
 import { WalletConnector } from './WalletConnector'
+
+type EthereumProviderOptions = Parameters<typeof WalletConnectProvider.init>[0];
 
 type WalletConnectOptions = {
     /** Wallet Connect icon */

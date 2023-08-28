@@ -1,5 +1,5 @@
 import type { BrowserProvider } from 'ethers'
-import type { EthereumProvider as WalletConnectProvider } from '@walletconnect/ethereum-provider/dist/types/EthereumProvider'
+import type WalletConnectProvider from '@walletconnect/ethereum-provider'
 import { ChainId } from '../../enums'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { chainRegistry } from '../../assets'
