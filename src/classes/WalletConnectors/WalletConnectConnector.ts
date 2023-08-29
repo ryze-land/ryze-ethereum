@@ -14,7 +14,7 @@ type WalletConnectOptions = {
     /**
      * Available chain IDs to switch.
      */
-    chains: number[]
+    chains: ChainId[]
     /**
      * WalletConnect Cloud Project ID.
      * @link https://cloud.walletconnect.com/sign-in.
