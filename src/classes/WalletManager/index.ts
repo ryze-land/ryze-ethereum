@@ -1,11 +1,10 @@
 import { BrowserProvider, EthersError, JsonRpcSigner } from 'ethers'
-import { defaultWalletConnectors } from '../../assets'
 import { ChainId, EthError } from '../../enums'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
-import { type WalletConnector } from '../WalletConnectors'
+import { defaultWalletConnectors, type WalletConnector } from '../WalletConnectors'
 import { EIP1193Provider } from './eip1193Provider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>

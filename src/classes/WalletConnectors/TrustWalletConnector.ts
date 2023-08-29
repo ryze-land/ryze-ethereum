@@ -1,6 +1,6 @@
 import { BrowserConnector, type WindowProvider } from './BrowserConnector'
 
-export class TrustWallet extends BrowserConnector {
+export class TrustWalletConnector extends BrowserConnector {
     public readonly id = 'trustwallet'
     public readonly name: string = 'Trust Wallet'
 
