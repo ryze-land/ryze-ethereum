@@ -23,3 +23,11 @@ export const defaultWalletConnectors = [
     trustWalletConnector,
     coinbaseConnector,
 ]
+
+export {
+    MetaMaskConnector,
+    BitgetConnector,
+    SafePalConnector,
+    TrustWalletConnector,
+    CoinbaseConnector,
+}
