@@ -1,4 +1,5 @@
-import { BrowserProvider } from 'ethers'
+import type { BrowserProvider } from 'ethers'
+import type WalletConnectProvider from '@walletconnect/ethereum-provider'
 import { ChainId } from '../../enums'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { chainRegistry } from '../../assets'
@@ -51,8 +52,10 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {string} method The method to be called on the provider,
      * @param {any[] | | Record<string, any>} params An optional array or object containing any associated parameters.
      */
-    public request(provider: BrowserProvider, method: string, params?: any[] | Record<string, any>): Promise<any> {
-        return provider.send(method, params || [])
+    public request(provider: BrowserProvider | WalletConnectProvider, method: string, params?: any[] | Record<string, any>): Promise<any> {
+        return 'request' in provider
+            ? provider.request({ method, params })
+            : provider.send(method, params || [])
     }
 
     /**
