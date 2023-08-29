@@ -1,7 +1,7 @@
 import { BrowserConnector } from './BrowserConnector'
 
 export class MetaMaskWallet extends BrowserConnector {
-    public readonly id = 'metamask'
+    public static readonly id = 'metamask'
     public readonly name: string = 'MetaMask'
 
     public getProvider() {

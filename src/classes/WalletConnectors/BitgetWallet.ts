@@ -2,7 +2,7 @@ import { BrowserConnector, type WindowProvider } from './BrowserConnector'
 
 // Previously known as BitKeep
 export class BitgetWallet extends BrowserConnector {
-    public readonly id: string = 'bitgetwallet'
+    public static readonly id: string = 'bitgetwallet'
     public readonly name: string = 'Bitget Wallet'
 
     public getProvider() {

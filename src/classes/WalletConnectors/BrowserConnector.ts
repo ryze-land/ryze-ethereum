@@ -15,7 +15,7 @@ export interface WindowProvider extends EIP1193Provider {
 }
 
 export class BrowserConnector extends WalletConnector<WindowProvider> {
-    public readonly id: string = 'browserConnector'
+    public static readonly id: string = 'browserConnector'
     public readonly name: string = 'Browser Wallet'
 
     public getProvider() {
