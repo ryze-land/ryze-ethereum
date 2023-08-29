@@ -35,7 +35,7 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {BrowserProvider} provider The ethereum provider.
      * @param {number} chainId The chain ID to set.
      */
-    public abstract setChain(chainId: ChainId, provider?: BrowserProvider | WalletConnectProvider): Promise<void>
+    public abstract setChain(chainId: ChainId, provider?: BrowserProvider): Promise<void>
 
     /**
      * Requests the provider to add the chain ID.
@@ -43,7 +43,7 @@ export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provide
      * @param {BrowserProvider} provider The ethereum provider.
      * @param {number} chainId The chain ID to set.
      */
-    public abstract addChain(chainId: ChainId, provider?: BrowserProvider | WalletConnectProvider): Promise<void>
+    public abstract addChain(chainId: ChainId, provider?: BrowserProvider): Promise<void>
 
     /**
      * Sends a request to the provider.
