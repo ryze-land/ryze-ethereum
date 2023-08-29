@@ -1,7 +1,9 @@
 import type WalletConnectProvider from '@walletconnect/ethereum-provider'
+import { makeError } from 'ethers'
 import { icons } from '../../assets/icons/icons'
 import { ChainId, EthError } from '../../enums'
 import { numberToHex } from '../../helpers'
+import { EthersErrorCode } from '../../errors'
 import { WalletConnector } from './WalletConnector'
 
 type EthereumProviderOptions = Parameters<typeof WalletConnectProvider.init>[0];
@@ -68,22 +70,29 @@ export class WalletConnect extends WalletConnector {
 
         const [defaultChain, ...optionalChains] = chains
 
-        this._provider = await EthereumProvider.init({
-            projectId,
-            chains: [defaultChain],
-            optionalChains,
-            showQrModal,
-            metadata,
-            qrModalOptions,
-            relayUrl,
-        })
-
         try {
+            this._provider = await EthereumProvider.init({
+                projectId,
+                chains: [defaultChain],
+                optionalChains,
+                showQrModal,
+                metadata,
+                qrModalOptions,
+                relayUrl,
+            })
+
             await this._provider.connect()
 
             return this._provider
         }
-        catch { }
+        catch (e) {
+            const errorMessage = (e as Error).message.toLowerCase()
+
+            if (errorMessage.includes('user rejected'))
+                throw makeError('Connection rejected by the user', EthersErrorCode.ACTION_REJECTED)
+
+            throw e
+        }
     }
 
     public async setChain(chainId: ChainId): Promise<void> {

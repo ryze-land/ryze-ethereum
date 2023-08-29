@@ -96,16 +96,16 @@ export class WalletManager {
         if (!walletConnector)
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
-        const provider = await walletConnector.getProvider()
-
-        if (!provider) {
-            if (walletErrorHandlers?.onProviderUnavailable)
-                return walletErrorHandlers.onProviderUnavailable(walletConnector.id)
-
-            throw new Error(EthError.PROVIDER_UNAVAILABLE)
-        }
-
         try {
+            const provider = await walletConnector.getProvider()
+
+            if (!provider) {
+                if (walletErrorHandlers?.onProviderUnavailable)
+                    return walletErrorHandlers.onProviderUnavailable(walletConnector.id)
+
+                throw new Error(EthError.PROVIDER_UNAVAILABLE)
+            }
+
             this._currentWalletConnectorId = walletConnector.id
             this._nativeProvider = provider
             this._wrappedProvider = new BrowserProvider(this._nativeProvider, 'any')
