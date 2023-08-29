@@ -124,8 +124,8 @@ export class WalletConnectConnector extends WalletConnector {
 
         if (!namespaces) return []
 
-        const chainIds = namespaces.eip155?.chains?.map(chain =>
-            parseInt(chain.split(':')[1] || ''))
+        const chainIds = namespaces.eip155?.chains
+            ?.map(chain => parseInt(chain.split(':')[1] || ''))
 
         return chainIds ?? []
     }
