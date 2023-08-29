@@ -1,7 +1,7 @@
 import { BrowserConnector } from './BrowserConnector'
 
 export class SafePalConnector extends BrowserConnector {
-    public static readonly id: string = 'safepal'
+    public readonly id: string = 'safepal'
     public readonly name: string = 'SafePal Wallet'
 
     public getProvider() {

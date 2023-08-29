@@ -10,7 +10,7 @@ import { numberToHex } from '../../helpers'
  */
 export abstract class WalletConnector<T extends EIP1193Provider = EIP1193Provider> {
     /** Unique wallet connector id */
-    public static readonly id: string
+    public abstract readonly id: string
     /** Wallet connector name */
     public abstract readonly name: string
     /** Wallet connector icon */

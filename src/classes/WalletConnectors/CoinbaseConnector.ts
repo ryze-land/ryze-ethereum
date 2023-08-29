@@ -1,7 +1,7 @@
 import { BrowserConnector } from './BrowserConnector'
 
 export class CoinbaseConnector extends BrowserConnector {
-    public static readonly id = 'coinbase'
+    public readonly id = 'coinbase'
     public readonly name: string = 'Coinbase Wallet'
 
     public getProvider() {
