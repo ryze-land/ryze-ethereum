@@ -8,7 +8,7 @@ import { CoinbaseConnector } from './CoinbaseConnector'
 
 export * from './WalletConnector'
 export * from './BrowserConnector'
-export { WalletConnectConnector } from './WalletConnectConnector'
+export * from './WalletConnectConnector'
 
 export const metamaskWalletConnector = new MetaMaskConnector({ icon: icons.metamask })
 export const bitgetConnector = new BitgetConnector({ icon: icons.bitkeep })
