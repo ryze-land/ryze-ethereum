@@ -43,7 +43,7 @@ type WalletConnectOptions = {
     relayUrl?: string
 }
 
-export class WalletConnect extends WalletConnector {
+export class WalletConnectConnector extends WalletConnector {
     public readonly id: string = 'walletConnect'
     public readonly name: string = 'Wallet Connect'
 
