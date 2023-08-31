@@ -4,7 +4,7 @@ import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } fr
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
-import { defaultWalletConnectors, type WalletConnector } from '../WalletConnectors'
+import { defaultWalletConnectors, WalletConnectConnector, type WalletConnector } from '../WalletConnectors'
 import { EIP1193Provider } from './eip1193Provider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
@@ -176,8 +176,15 @@ export class WalletManager {
     /**
      * Disconnects the currently connected wallet, if any.
      */
-    public disconnect(): void {
+    public async disconnect(): Promise<void> {
         this.walletInfo = null
+
+        if (!this._currentWalletConnectorId)
+            return
+
+        const connector = this._connectors[this._currentWalletConnectorId]
+
+        connector instanceof WalletConnectConnector && await connector.disconnect()
     }
 
     /**
