@@ -138,6 +138,13 @@ export class WalletConnectConnector extends WalletConnector {
             await this.provider.disconnect()
         }
         catch (e) {
+            /*
+                Sometimes WC tries to use an old key/topic that it recovered
+                from local storage but is not active anymore and throws an error.
+
+                In this case we check the error by the message and handle the
+                specific case mentioned above, otherwise the error is thrown again.
+            */
             if (!(e as Error).message.includes('No matching key'))
                 throw e
         }
