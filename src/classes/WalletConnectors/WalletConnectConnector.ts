@@ -84,7 +84,7 @@ export class WalletConnectConnector extends WalletConnector {
             const isChainsStale = this._isChainsStale(chains)
 
             // If there is an active session with stale chains, disconnect the current session.
-            if (this._provider.session && isChainsStale) await this._provider.disconnect()
+            if (this._provider.session && isChainsStale) await this.disconnect()
 
             // If there no active session, or the chains are stale, connect.
             if (!this._provider.session || isChainsStale) {
