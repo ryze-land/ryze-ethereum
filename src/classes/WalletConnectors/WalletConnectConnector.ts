@@ -134,7 +134,13 @@ export class WalletConnectConnector extends WalletConnector {
     }
 
     public async disconnect() {
-        await this.provider.disconnect()
+        try {
+            await this.provider.disconnect()
+        }
+        catch (e) {
+            if (!(e as Error).message.includes('No matching key'))
+                throw e
+        }
     }
 
     private _getNamespaceChainsIds() {
