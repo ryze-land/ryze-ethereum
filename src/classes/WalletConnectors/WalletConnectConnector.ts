@@ -81,7 +81,21 @@ export class WalletConnectConnector extends WalletConnector {
                 relayUrl,
             })
 
-            await this._provider.connect()
+            const isChainsStale = this._isChainsStale(chains)
+
+            // If there is an active session with stale chains, disconnect the current session.
+            if (this._provider.session && isChainsStale) await this._provider.disconnect()
+
+            // If there no active session, or the chains are stale, connect.
+            if (!this._provider.session || isChainsStale) {
+                await this._provider.connect({
+                    chains: [defaultChain],
+                    optionalChains: optionalChains.length ? optionalChains : undefined,
+                })
+            }
+
+            // If session exists and chains are authorized, enable provider for required chain
+            await this._provider.enable()
 
             return this._provider
         }
@@ -119,6 +133,10 @@ export class WalletConnectConnector extends WalletConnector {
         await this.setChain(chainId)
     }
 
+    public async disconnect() {
+        await this.provider.disconnect()
+    }
+
     private _getNamespaceChainsIds() {
         const namespaces = this._provider?.session?.namespaces
 
@@ -135,5 +153,27 @@ export class WalletConnectConnector extends WalletConnector {
             throw new Error(EthError.PROVIDER_UNAVAILABLE)
 
         return this._provider
+    }
+
+    /**
+     * Checks if the target chains match the chains that were
+     * initially requested by the connector for the WalletConnect session.
+     * If there is a mismatch, this means that the chains on the connector
+     * are considered stale, and need to be revalidated at a later point (via
+     * connection).
+     *
+     * There may be a scenario where a dapp adds a chain to the
+     * connector later on, however, this chain will not have been approved or rejected
+     * by the wallet. In this case, the chain is considered stale.
+     *
+     * There are exceptions however:
+     * -  If the wallet supports dynamic chain addition via `eth_addEthereumChain`,
+     *    then the chain is not considered stale.
+     *
+     */
+    private _isChainsStale(chains: ChainId[]) {
+        const namespaceChains = this._getNamespaceChainsIds()
+
+        return chains.every(id => namespaceChains.includes(id))
     }
 }
