@@ -17,7 +17,7 @@ export interface WalletErrorHandlers {
 }
 
 export interface ConnectWalletErrorHandlers extends WalletErrorHandlers {
-    onProviderUnavailable?: WalletErrorHandler<string>
+    onProviderUnavailable?: WalletErrorHandler<WalletConnector>
 }
 
 /**
@@ -100,7 +100,7 @@ export class WalletManager {
 
             if (!provider) {
                 if (walletErrorHandlers?.onProviderUnavailable)
-                    return walletErrorHandlers.onProviderUnavailable(walletConnector.id)
+                    return walletErrorHandlers.onProviderUnavailable(walletConnector)
 
                 throw new Error(EthError.PROVIDER_UNAVAILABLE)
             }
