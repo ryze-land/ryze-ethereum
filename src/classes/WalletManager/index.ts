@@ -61,7 +61,7 @@ export class WalletManager {
         this.availableChainIds = availableChainIds
         this._onWalletUpdate = onWalletUpdate
 
-        this._storage = new LocalStorage<WalletInfo>(
+        this._storage = new LocalStorage(
             'ethereum-wallet-info',
             storedValue => {
                 const json = walletInfoSchema.parse(JSON.parse(storedValue))
