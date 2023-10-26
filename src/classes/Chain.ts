@@ -1,6 +1,8 @@
 import { allChains } from '../assets'
 import { ChainId, EthError } from '../enums'
 
+export type ChainMap<T> = Record<ChainId, T>
+
 export class Chain {
     constructor(
         public readonly id: ChainId,
@@ -27,7 +29,7 @@ export class Chain {
     }: {
         chainIds?: ChainId[]
         initialValueCallback?: (chain: ChainId) => T
-    }) {
+    }): ChainMap<T> {
         const _chains = chainIds || allChains
         const _initialValueCallback = initialValueCallback || (() => ({}))
 
@@ -35,6 +37,28 @@ export class Chain {
             (acc, curr) => ({ ...acc, [curr]: _initialValueCallback(curr) }),
             {} as Record<ChainId, T>,
         )
+    }
+
+    public static async createAsyncChainMap<T>({
+        chainIds,
+        initialValueCallback,
+    }: {
+        chainIds?: ChainId[]
+        initialValueCallback?: (chain: ChainId) => Promise<T>
+    }): Promise<ChainMap<T>> {
+        const chainMap = Chain.createChainMap({ chainIds, initialValueCallback })
+
+        // Map over the entries of the Record (each entry is [key, promise])
+        const entries = await Promise.all(
+            Object.entries(chainMap).map(async ([chainId, promise]) => {
+                const resolvedValue = await promise
+
+                return [+chainId as ChainId, resolvedValue] as const
+            }),
+        )
+
+        // Convert the array of entries back into an object
+        return Object.fromEntries(entries) as Record<ChainId, T>
     }
 
     public static isChainId(
