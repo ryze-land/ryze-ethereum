@@ -30,7 +30,7 @@ export class WalletManager {
     public readonly availableChainIds: ChainId[]
 
     private readonly _onWalletUpdate?: OnWalletUpdate
-    private readonly _storage: LocalStorage<WalletInfo | null>
+    private readonly _storage: LocalStorage<WalletInfo>
     private _wrappedProvider: BrowserProvider | null = null
     private _nativeProvider: EIP1193Provider | null = null
     private _walletInfo: WalletInfo | null = null
@@ -61,7 +61,7 @@ export class WalletManager {
         this.availableChainIds = availableChainIds
         this._onWalletUpdate = onWalletUpdate
 
-        this._storage = new LocalStorage<WalletInfo | null>(
+        this._storage = new LocalStorage(
             'ethereum-wallet-info',
             storedValue => {
                 const json = walletInfoSchema.parse(JSON.parse(storedValue))

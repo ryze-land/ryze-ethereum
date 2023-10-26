@@ -1,20 +1,22 @@
-const defaultParser = <T>(storedValue: string) => JSON.parse(storedValue) as T
+const defaultParserFromJSON = <StorageType>(storedValue: string) => JSON.parse(storedValue) as StorageType
+const defaultParserToJSON = <StorageType>(value: StorageType) => JSON.stringify(value)
 
-export class LocalStorage<T> {
+export class LocalStorage<StorageType> {
     constructor(
         private readonly _key: string,
-        private readonly _parser: (storedValue: string) => T = defaultParser,
+        private readonly _fromJSON: (storedValue: string) => StorageType = defaultParserFromJSON,
+        private readonly _toJSON: (stored: StorageType) => string = defaultParserToJSON,
     ) {
     }
 
-    public set(item: T | null) {
+    public set(item: StorageType | null) {
         if (!this.available)
             return
 
         if (item === null)
             localStorage.removeItem(this._key)
         else
-            localStorage.setItem(this._key, JSON.stringify(item))
+            localStorage.setItem(this._key, this._toJSON(item))
     }
 
     public get() {
@@ -26,7 +28,7 @@ export class LocalStorage<T> {
         if (item === null)
             return item
 
-        return this._parser(item)
+        return this._fromJSON(item)
     }
 
     private get available() {
