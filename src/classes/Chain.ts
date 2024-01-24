@@ -1,7 +1,7 @@
 import { allChains } from '../assets'
 import { ChainId, EthError } from '../enums'
 
-export type ChainMap<T> = Record<ChainId, T>
+export type ChainMap<T> = Partial<Record<ChainId, T>>
 
 export class Chain {
     constructor(
@@ -33,9 +33,9 @@ export class Chain {
         const _chains = chainIds || allChains
         const _initialValueCallback = initialValueCallback || (() => ({}))
 
-        return _chains.reduce(
+        return _chains.reduce<ChainMap<T>>(
             (acc, curr) => ({ ...acc, [curr]: _initialValueCallback(curr) }),
-            {} as Record<ChainId, T>,
+            {},
         )
     }
 
@@ -58,7 +58,7 @@ export class Chain {
         )
 
         // Convert the array of entries back into an object
-        return Object.fromEntries(entries) as Record<ChainId, T>
+        return Object.fromEntries(entries) as ChainMap<T>
     }
 
     public static isChainId(

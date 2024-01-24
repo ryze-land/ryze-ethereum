@@ -1,7 +1,7 @@
 import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
 import { chainRegistry } from '../assets'
 import { ChainId } from '../enums'
-import { Chain } from './Chain'
+import { Chain, type ChainMap } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
@@ -12,7 +12,7 @@ export class Ethereum {
     public readonly availableChainIds: ChainId[]
     public readonly walletManager: WalletManager
     public readonly gasMultiplier: bigint
-    private readonly _providers: Record<ChainId, MultiRpcProvider | JsonRpcProvider>
+    private readonly _providers: ChainMap<MultiRpcProvider | JsonRpcProvider>
 
     /**
      * Constructor for the Ethereum class.
@@ -37,7 +37,7 @@ export class Ethereum {
         defaultChainId: ChainId
         availableChainIds: ChainId[]
         connectors?: WalletConnector[],
-        chainToRpcMap?: Partial<Record<ChainId, string[]>>
+        chainToRpcMap?: ChainMap<string[]>
         onWalletUpdate?: OnWalletUpdate
         gasMultiplier?: bigint
     }) {
