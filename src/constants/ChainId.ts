@@ -24,14 +24,19 @@ export const ChainIds = {
 
 export type ChainName = keyof typeof ChainIds
 export type ChainId = typeof ChainIds[ChainName]
-export type NonEmptyChainIdLiterals = [
-    ZodLiteral<ChainId>,
-    ZodLiteral<ChainId>,
-    ...ZodLiteral<ChainId>[],
+export type NonEmptyZodLiterals<T> = [
+    ZodLiteral<T>,
+    ZodLiteral<T>,
+    ...ZodLiteral<T>[],
 ]
 
-export const allChains: ChainId[] = Object.values(ChainIds)
+export const allChainNames = Object.keys(ChainIds) as ChainName[]
+export const allChainIds: ChainId[] = Object.values(ChainIds)
 
 export const chainIdSchema = zodUnion(
-    allChains.map(chainId => zodLiteral(chainId)) as NonEmptyChainIdLiterals,
+    allChainIds.map(chainId => zodLiteral(chainId)) as NonEmptyZodLiterals<ChainId>,
+)
+
+export const chainNameSchema = zodUnion(
+    allChainNames.map(chainId => zodLiteral(chainId)) as NonEmptyZodLiterals<ChainName>,
 )

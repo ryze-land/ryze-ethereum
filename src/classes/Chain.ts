@@ -1,4 +1,4 @@
-import { ChainId, allChains, EthErrors, chainIdSchema } from '../constants'
+import { ChainId, allChainIds, EthErrors, chainIdSchema } from '../constants'
 
 export type ChainMap<T> = Partial<Record<ChainId, T>>
 
@@ -29,7 +29,7 @@ export class Chain {
         chainIds?: ChainId[]
         initialValueCallback?: (chain: ChainId) => T
     }): ChainMap<T> {
-        const _chains = chainIds || allChains
+        const _chains = chainIds || allChainIds
         const _initialValueCallback = initialValueCallback || (() => ({}))
 
         return _chains.reduce<ChainMap<T>>(
