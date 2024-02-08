@@ -1,5 +1,4 @@
-import { allChains } from '../assets'
-import { ChainId, EthError } from '../enums'
+import { ChainId, allChains, EthErrors, chainIdSchema } from '../constants'
 
 export type ChainMap<T> = Partial<Record<ChainId, T>>
 
@@ -16,7 +15,7 @@ export class Chain {
         public readonly rpcList: string[],
     ) {
         if (rpcList.length === 0)
-            throw new Error(EthError.INVALID_CHAIN_CONFIG)
+            throw new Error(EthErrors.INVALID_CHAIN_CONFIG)
     }
 
     public get rpc(): string {
@@ -63,14 +62,12 @@ export class Chain {
 
     public static isChainId(
         chainId: number,
-        availableChains: ChainId[] = allChains,
     ): chainId is ChainId {
-        return availableChains.includes(chainId)
+        return chainIdSchema.safeParse(chainId).success
     }
 
     public static parseChainId(
         chain: string | number | bigint,
-        availableChains: ChainId[] = allChains,
     ): ChainId | null {
         if (typeof chain === 'string')
             chain = parseInt(chain) // this will parse hex and decimals
@@ -78,17 +75,16 @@ export class Chain {
         if (typeof chain === 'bigint')
             chain = Number(chain)
 
-        return Chain.isChainId(chain, availableChains) ? chain : null
+        return Chain.isChainId(chain) ? chain : null
     }
 
     public static parseChainIdOrFail(
         chain: string | number | bigint,
-        availableChains: ChainId[] = allChains,
     ): ChainId {
-        const parsedChain = Chain.parseChainId(chain, availableChains)
+        const parsedChain = Chain.parseChainId(chain)
 
         if (!parsedChain)
-            throw new Error(EthError.UNSUPPORTED_CHAIN)
+            throw new Error(EthErrors.UNSUPPORTED_CHAIN)
 
         return parsedChain
     }

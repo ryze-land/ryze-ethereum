@@ -2,7 +2,7 @@ import { BrowserProvider } from 'ethers'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { numberToHex } from '../../helpers'
 import { ProviderErrorCode, isEthersError, isProviderError } from '../../errors'
-import { ChainId, EthError } from '../../enums'
+import { ChainId, EthErrors } from '../../constants'
 import { WalletConnector } from './WalletConnector'
 
 export interface WindowProvider extends EIP1193Provider {
@@ -66,7 +66,7 @@ export class BrowserConnector extends WalletConnector<WindowProvider> {
                 isProviderError(e.error) &&
                 e.error.code === ProviderErrorCode.RESOURCE_UNAVAILABLE
             )
-                throw new Error(EthError.REQUEST_ALREADY_PENDING)
+                throw new Error(EthErrors.REQUEST_ALREADY_PENDING)
 
             throw e
         }

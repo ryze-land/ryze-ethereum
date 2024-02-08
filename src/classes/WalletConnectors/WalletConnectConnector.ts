@@ -1,7 +1,7 @@
 import type WalletConnectProvider from '@walletconnect/ethereum-provider'
 import { makeError } from 'ethers'
 import { icons } from '../../assets/icons/icons'
-import { ChainId, EthError } from '../../enums'
+import { ChainId, EthErrors } from '../../constants'
 import { numberToHex } from '../../helpers'
 import { EthersErrorCode } from '../../errors'
 import { WalletConnector } from './WalletConnector'
@@ -26,7 +26,7 @@ type WalletConnectOptions = {
      */
     metadata?: EthereumProviderOptions['metadata']
     /**
-     * Whether or not to show the QR code modal.
+     * Whether to show the QR code modal.
      * @default true
      * @link https://docs.walletconnect.com/2.0/advanced/providers/ethereum#initialization
      */
@@ -86,7 +86,7 @@ export class WalletConnectConnector extends WalletConnector {
             // If there is an active session with stale chains, disconnect the current session.
             if (this._provider.session && isChainsStale) await this.disconnect()
 
-            // If there no active session, or the chains are stale, connect.
+            // If there is no active session, or the chains are stale, connect.
             if (!this._provider.session || isChainsStale) {
                 await this._provider.connect({
                     chains: [defaultChain],
@@ -163,7 +163,7 @@ export class WalletConnectConnector extends WalletConnector {
 
     private get provider() {
         if (!this._provider)
-            throw new Error(EthError.PROVIDER_UNAVAILABLE)
+            throw new Error(EthErrors.PROVIDER_UNAVAILABLE)
 
         return this._provider
     }

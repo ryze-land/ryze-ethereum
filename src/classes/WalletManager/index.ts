@@ -1,5 +1,5 @@
 import { BrowserProvider, EthersError, JsonRpcSigner } from 'ethers'
-import { ChainId, EthError } from '../../enums'
+import { ChainId, EthErrors } from '../../constants'
 import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } from '../../errors'
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
@@ -93,7 +93,7 @@ export class WalletManager {
         const walletConnector = this._connectors[walletConnectorId]
 
         if (!walletConnector)
-            throw new Error(EthError.PROVIDER_UNAVAILABLE)
+            throw new Error(EthErrors.PROVIDER_UNAVAILABLE)
 
         try {
             const provider = await walletConnector.getProvider()
@@ -102,7 +102,7 @@ export class WalletManager {
                 if (walletErrorHandlers?.onProviderUnavailable)
                     return walletErrorHandlers.onProviderUnavailable(walletConnector)
 
-                throw new Error(EthError.PROVIDER_UNAVAILABLE)
+                throw new Error(EthErrors.PROVIDER_UNAVAILABLE)
             }
 
             this._currentWalletConnectorId = walletConnector.id
@@ -196,7 +196,7 @@ export class WalletManager {
      */
     public async getSigner(): Promise<JsonRpcSigner> {
         if (!this._wrappedProvider)
-            throw new Error(EthError.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
         try {
             const signer = await this._wrappedProvider.getSigner()
@@ -207,7 +207,7 @@ export class WalletManager {
         }
         catch (e) {
             if ((e as Error).message.includes('unknown account'))
-                throw new Error(EthError.SIGNER_UNAVAILABLE)
+                throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
             throw e
         }
@@ -223,7 +223,7 @@ export class WalletManager {
             return
 
         if (!walletInfo?.address || !walletInfo?.connected || !walletInfo.walletConnectorId || !this._wrappedProvider)
-            throw new Error(EthError.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
         try {
             await this._connectors[walletInfo.walletConnectorId].setChain(chainId, this._wrappedProvider)
@@ -250,10 +250,10 @@ export class WalletManager {
         params?: any[] | Record<string, any>
     }): Promise<any> {
         if (!this._wrappedProvider)
-            throw new Error(EthError.WALLET_NOT_CONNECTED)
+            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
 
         if (!this._wrappedProvider.provider.send)
-            throw new Error(EthError.UNSUPPORTED_REQUEST)
+            throw new Error(EthErrors.UNSUPPORTED_REQUEST)
 
         return await this._wrappedProvider.provider.send(method, params || [])
     }
@@ -289,7 +289,7 @@ export class WalletManager {
      */
     private async _validateSigner(signer: JsonRpcSigner): Promise<void> {
         if (!await signer.getAddress())
-            throw new Error(EthError.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
     }
 
     /**
@@ -301,7 +301,7 @@ export class WalletManager {
         const accounts = await this.request({ method: 'eth_requestAccounts' })
 
         if (!accounts.length)
-            throw new Error(EthError.SIGNER_UNAVAILABLE)
+            throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
         return accounts[0].toLowerCase()
     }
@@ -313,11 +313,9 @@ export class WalletManager {
      */
     private async _getWalletChainId(): Promise<ChainId | null> {
         if (!this._wrappedProvider)
-            throw new Error(EthError.WALLET_NOT_CONNECTED)
+            throw new Error(EthErrors.WALLET_NOT_CONNECTED)
 
-        const chainId = (await this._wrappedProvider.getNetwork()).chainId
-
-        return Chain.parseChainId(chainId, this.availableChainIds)
+        return Chain.parseChainId((await this._wrappedProvider.getNetwork()).chainId)
     }
 
     /**
@@ -365,9 +363,7 @@ export class WalletManager {
         if (!this._walletInfo)
             return
 
-        this.walletInfo = this._walletInfo.withChain(
-            Chain.parseChainId(chainId, this.availableChainIds),
-        )
+        this.walletInfo = this._walletInfo.withChain(Chain.parseChainId(chainId))
     }
 
     /**

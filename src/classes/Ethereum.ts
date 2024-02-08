@@ -1,6 +1,6 @@
 import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
 import { chainRegistry } from '../assets'
-import { ChainId } from '../enums'
+import { ChainId } from '../constants'
 import { Chain, type ChainMap } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { Transaction } from './Transaction'
@@ -78,15 +78,6 @@ export class Ethereum {
             await this.walletManager.getSigner(),
             gasMultiplier || this.gasMultiplier,
         )
-    }
-
-    /**
-     * Validates if a given chain is a valid ChainId.
-     *
-     * @param chain - The chain to validate.
-     */
-    public validateChain(chain: ChainId | number | string | bigint): chain is ChainId {
-        return !!Chain.parseChainId(chain, this.availableChainIds)
     }
 
     /**

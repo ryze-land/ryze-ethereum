@@ -1,6 +1,6 @@
 import type { BrowserProvider } from 'ethers'
 import type WalletConnectProvider from '@walletconnect/ethereum-provider'
-import { ChainId } from '../../enums'
+import { ChainId } from '../../constants'
 import { EIP1193Provider } from '../WalletManager/eip1193Provider'
 import { chainRegistry } from '../../assets'
 import { numberToHex } from '../../helpers'
