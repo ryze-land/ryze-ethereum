@@ -2,13 +2,12 @@ import {
     object as zodObject,
     string as zodString,
     boolean as zodBoolean,
-    nativeEnum as zodNativeEnum,
 } from 'zod'
-import { ChainId } from '../enums'
+import { ChainId, chainIdSchema } from '../constants'
 
 export const walletInfoSchema = zodObject({
     walletConnectorId: zodString().nullable(),
-    chainId: zodNativeEnum(ChainId).nullable(),
+    chainId: chainIdSchema.nullable(),
     address: zodString(),
     connected: zodBoolean(),
 })

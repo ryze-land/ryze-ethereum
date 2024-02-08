@@ -1,6 +1,6 @@
 export * from './src/assets'
 export * from './src/classes'
-export * from './src/enums'
+export * from './src/constants'
 export * from './src/errors'
 export * from './src/helpers'
 export * from './src/types'

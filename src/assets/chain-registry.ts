@@ -1,9 +1,9 @@
 import { Chain } from '../classes'
-import { ChainId } from '../enums'
+import { ChainId, ChainIds } from '../constants'
 
 export const chainRegistry: Record<ChainId, Chain> = {
-    [ChainId.ETH]: new Chain(
-        ChainId.ETH,
+    [ChainIds.ETH]: new Chain(
+        ChainIds.ETH,
         'Ethereum',
         false,
         {
@@ -14,8 +14,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         ['https://rpc.ankr.com/eth'],
     ),
 
-    [ChainId.BNB]: new Chain(
-        ChainId.BNB,
+    [ChainIds.BNB]: new Chain(
+        ChainIds.BNB,
         'BNB Smart Chain',
         false,
         {
@@ -25,8 +25,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://bscscan.com',
         ['https://rpc.ankr.com/bsc'],
     ),
-    [ChainId.BNB_TESTNET]: new Chain(
-        ChainId.BNB_TESTNET,
+    [ChainIds.BNB_TESTNET]: new Chain(
+        ChainIds.BNB_TESTNET,
         'BNB Smart Chain Testnet',
         true,
 
@@ -38,8 +38,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         ['https://rpc.ankr.com/bsc_testnet_chapel'],
     ),
 
-    [ChainId.AVAX]: new Chain(
-        ChainId.AVAX,
+    [ChainIds.AVAX]: new Chain(
+        ChainIds.AVAX,
         'Avalanche',
         false,
         {
@@ -49,8 +49,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://snowtrace.io',
         ['https://rpc.ankr.com/avalanche-c'],
     ),
-    [ChainId.AVAX_TESTNET]: new Chain(
-        ChainId.AVAX_TESTNET,
+    [ChainIds.AVAX_TESTNET]: new Chain(
+        ChainIds.AVAX_TESTNET,
         'Avalanche Testnet',
         true,
         {
@@ -61,8 +61,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         ['https://api.avax-test.network/ext/bc/C/rpc'],
     ),
 
-    [ChainId.POLYGON]: new Chain(
-        ChainId.POLYGON,
+    [ChainIds.POLYGON]: new Chain(
+        ChainIds.POLYGON,
         'Polygon',
         false,
         {
@@ -72,8 +72,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://polygonscan.com/',
         ['https://rpc.ankr.com/polygon'],
     ),
-    [ChainId.POLYGON_TESTNET]: new Chain(
-        ChainId.POLYGON_TESTNET,
+    [ChainIds.POLYGON_TESTNET]: new Chain(
+        ChainIds.POLYGON_TESTNET,
         'Polygon Mumbai Testnet',
         true,
         {
@@ -83,8 +83,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://mumbai.polygonscan.com/',
         ['https://rpc.ankr.com/polygon_mumbai'],
     ),
-    [ChainId.FANTOM]: new Chain(
-        ChainId.FANTOM,
+    [ChainIds.FANTOM]: new Chain(
+        ChainIds.FANTOM,
         'Fantom',
         false,
         {
@@ -94,8 +94,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://ftmscan.com/',
         ['https://rpc.ftm.tools'],
     ),
-    [ChainId.FANTOM_TESTNET]: new Chain(
-        ChainId.FANTOM_TESTNET,
+    [ChainIds.FANTOM_TESTNET]: new Chain(
+        ChainIds.FANTOM_TESTNET,
         'Fantom Testnet',
         true,
         {
@@ -105,8 +105,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://testnet.ftmscan.com/',
         ['https://rpc.testnet.fantom.network'],
     ),
-    [ChainId.OPTIMISM]: new Chain(
-        ChainId.OPTIMISM,
+    [ChainIds.OPTIMISM]: new Chain(
+        ChainIds.OPTIMISM,
         'Optimism',
         false,
         {
@@ -116,8 +116,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://optimistic.etherscan.io/',
         ['https://mainnet.optimism.io'],
     ),
-    [ChainId.OPTIMISM_TESTNET]: new Chain(
-        ChainId.OPTIMISM_TESTNET,
+    [ChainIds.OPTIMISM_TESTNET]: new Chain(
+        ChainIds.OPTIMISM_TESTNET,
         'Optimism Goerli Testnet',
         true,
         {
@@ -127,8 +127,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://goerli-optimism.etherscan.io/',
         ['https://goerli.optimism.io'],
     ),
-    [ChainId.ARBITRUM]: new Chain(
-        ChainId.ARBITRUM,
+    [ChainIds.ARBITRUM]: new Chain(
+        ChainIds.ARBITRUM,
         'Arbitrum One',
         false,
         {
@@ -138,8 +138,8 @@ export const chainRegistry: Record<ChainId, Chain> = {
         'https://arbiscan.io/',
         ['https://rpc.ankr.com/arbitrum'],
     ),
-    [ChainId.ARBITRUM_TESTNET]: new Chain(
-        ChainId.ARBITRUM_TESTNET,
+    [ChainIds.ARBITRUM_TESTNET]: new Chain(
+        ChainIds.ARBITRUM_TESTNET,
         'Arbitrum Goerli Testnet',
         true,
         {
