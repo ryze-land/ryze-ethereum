@@ -8,6 +8,7 @@ export function getNetworkConfig(
     const chain = chainRegistry[ChainIds[chainNameSchema.parse(chainName)]]
 
     return {
+        name: chainName,
         rpc: chain.rpc,
         chainId: chain.id,
         explorer: explorerKeys?.[chainName],
