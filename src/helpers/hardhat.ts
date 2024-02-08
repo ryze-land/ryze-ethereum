@@ -9,8 +9,9 @@ export function getNetworkConfig(
 
     return {
         name: chainName,
-        rpc: chain.rpc,
+        url: chain.rpc,
         chainId: chain.id,
         explorer: explorerKeys?.[chainName],
+        gasMultiplier: 2,
     }
 }
