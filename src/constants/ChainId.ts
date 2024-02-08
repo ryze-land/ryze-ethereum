@@ -24,7 +24,11 @@ export const ChainIds = {
 
 export type ChainName = keyof typeof ChainIds
 export type ChainId = typeof ChainIds[ChainName]
-export type NonEmptyChainIdLiterals = [ZodLiteral<ChainId>, ZodLiteral<ChainId>, ...ZodLiteral<ChainId>[]]
+export type NonEmptyChainIdLiterals = [
+    ZodLiteral<ChainId>,
+    ZodLiteral<ChainId>,
+    ...ZodLiteral<ChainId>[],
+]
 
 export const allChains: ChainId[] = Object.values(ChainIds)
 
