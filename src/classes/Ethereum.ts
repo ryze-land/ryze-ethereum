@@ -9,7 +9,7 @@ import { type WalletConnector } from './WalletConnectors'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
-    public readonly availableChainIds: ChainId[]
+    public readonly availableChainIds: readonly ChainId[]
     public readonly walletManager: WalletManager
     public readonly gasMultiplier: bigint
     private readonly _providers: ChainMap<MultiRpcProvider | JsonRpcProvider>
@@ -19,6 +19,7 @@ export class Ethereum {
      *
      * @param defaultChainId - The default ChainId to be used.
      * @param availableChainIds - Array of available ChainIds.
+     * @param connectors - Optional array of WalletConnectors to be used.
      * @param chainToRpcMap - Optional mapping from ChainIds to RPC URLs.
      * @param onWalletUpdate - Optional callback to be invoked when the wallet updates.
      * @param gasMultiplier - Optional multiplier to be used when estimating the gas limit for transactions.
@@ -35,7 +36,7 @@ export class Ethereum {
         gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
-        availableChainIds: ChainId[]
+        availableChainIds: readonly ChainId[]
         connectors?: WalletConnector[],
         chainToRpcMap?: ChainMap<string[]>
         onWalletUpdate?: OnWalletUpdate
@@ -43,7 +44,7 @@ export class Ethereum {
     }) {
         this.defaultChainId = defaultChainId
         this.availableChainIds = availableChainIds
-        this.walletManager = new WalletManager({ defaultChainId, availableChainIds, connectors, onWalletUpdate })
+        this.walletManager = new WalletManager({ defaultChainId, connectors, onWalletUpdate })
         this.gasMultiplier = gasMultiplier
 
         this._providers = Chain.createChainMap({

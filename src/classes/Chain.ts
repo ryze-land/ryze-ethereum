@@ -26,7 +26,7 @@ export class Chain {
         chainIds,
         initialValueCallback,
     }: {
-        chainIds?: ChainId[]
+        chainIds?: readonly ChainId[]
         initialValueCallback?: (chain: ChainId) => T
     }): ChainMap<T> {
         const _chains = chainIds || allChainIds
@@ -42,7 +42,7 @@ export class Chain {
         chainIds,
         initialValueCallback,
     }: {
-        chainIds?: ChainId[]
+        chainIds?: readonly ChainId[]
         initialValueCallback?: (chain: ChainId) => Promise<T>
     }): Promise<ChainMap<T>> {
         const chainMap = Chain.createChainMap({ chainIds, initialValueCallback })
