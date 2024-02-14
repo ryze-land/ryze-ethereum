@@ -1,6 +1,6 @@
 import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
 import { chainRegistry } from '../assets'
-import { ChainId } from '../constants'
+import { allChainIds, ChainId } from '../constants'
 import { Chain, type ChainMap } from './Chain'
 import { MultiRpcProvider } from './MultiRpcProvider'
 import { Transaction } from './Transaction'
@@ -48,7 +48,7 @@ export class Ethereum {
         this.gasMultiplier = gasMultiplier
 
         this._providers = Chain.createChainMap({
-            chainIds: availableChainIds,
+            chainIds: allChainIds,
             initialValueCallback: (chainId: ChainId) => {
                 const chain = chainRegistry[chainId]
                 const rpcs = chainToRpcMap?.[chainId] || chain.rpcList
