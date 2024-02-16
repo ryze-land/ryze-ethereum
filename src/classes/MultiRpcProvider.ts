@@ -9,9 +9,12 @@ import { CircularArray } from './CircularArray'
 export class MultiRpcProvider implements ContractRunner {
     private providers: CircularArray<JsonRpcProvider>
 
-    constructor(providers: string[]) {
+    constructor(
+        providers: string[],
+        { batchMaxSize }: { batchMaxSize?: number },
+    ) {
         this.providers = new CircularArray(
-            providers.map(provider => new JsonRpcProvider(provider)),
+            providers.map(provider => new JsonRpcProvider(provider, undefined, { batchMaxSize })),
         )
     }
 
