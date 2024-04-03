@@ -25,6 +25,8 @@ export const Testnets = {
 export type TestnetName = keyof typeof Testnets
 export type TestnetId = typeof Testnets[TestnetName]
 
+export const MainnetIds: MainnetId[] = Object.values(Mainnets)
+export const TestnetIds: TestnetId[] = Object.values(Testnets)
 export const ChainIds = {
     ...Mainnets,
     ...Testnets,

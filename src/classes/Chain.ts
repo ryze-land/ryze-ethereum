@@ -1,4 +1,4 @@
-import { ChainId, allChainIds, EthErrors, chainIdSchema } from '../constants'
+import { ChainId, allChainIds, EthErrors, chainIdSchema, TestnetId, Testnets, MainnetId, Mainnets } from '../constants'
 
 export type ChainMap<T> = Partial<Record<ChainId, T>>
 
@@ -66,6 +66,14 @@ export class Chain {
         return chainIdSchema.safeParse(chainId).success
     }
 
+    public static isMainnet(chainId: ChainId): chainId is MainnetId {
+        return Object.values(Mainnets).includes(chainId as MainnetId)
+    }
+
+    public static isTestnet(chainId: ChainId): chainId is TestnetId {
+        return Object.values(Testnets).includes(chainId as TestnetId)
+    }
+
     public static parseChainId(
         chain: string | number | bigint,
     ): ChainId | null {
@@ -87,5 +95,21 @@ export class Chain {
             throw new Error(EthErrors.UNSUPPORTED_CHAIN)
 
         return parsedChain
+    }
+
+    public static splitMainnetsAndTestnets(chainIds: ChainId[]): {
+        mainnets: MainnetId[]
+        testnets: TestnetId[]
+    } {
+        const mainnets: MainnetId[] = []
+        const testnets: TestnetId[] = []
+
+        for (const chainId of chainIds) {
+            Chain.isMainnet(chainId)
+                ? mainnets.push(chainId)
+                : testnets.push(chainId)
+        }
+
+        return { mainnets, testnets }
     }
 }
