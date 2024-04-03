@@ -11,6 +11,7 @@ export const Mainnets = {
 } as const
 
 export type MainnetName = keyof typeof Mainnets
+export type MainnetId = typeof Mainnets[MainnetName]
 
 export const Testnets = {
     BNB_TESTNET: 97,
@@ -22,6 +23,7 @@ export const Testnets = {
 } as const
 
 export type TestnetName = keyof typeof Testnets
+export type TestnetId = typeof Testnets[TestnetName]
 
 export const ChainIds = {
     ...Mainnets,
