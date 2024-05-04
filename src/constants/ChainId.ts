@@ -2,12 +2,15 @@ import { literal as zodLiteral, union as zodUnion, type ZodLiteral } from 'zod'
 
 export const Mainnets = {
     ETH: 1,
+    OPTIMISM: 10,
+    CRONOS: 25,
     BNB: 56,
-    AVAX: 43114,
     POLYGON: 137,
     FANTOM: 250,
-    OPTIMISM: 10,
+    BASE: 8453,
     ARBITRUM: 42161,
+    AVAX: 43114,
+    BLAST: 81457,
 } as const
 
 export type MainnetName = keyof typeof Mainnets
