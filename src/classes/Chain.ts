@@ -1,6 +1,8 @@
 import { ChainId, allChainIds, EthErrors, chainIdSchema, TestnetId, Testnets, MainnetId, Mainnets } from '../constants'
 
-export type ChainMap<T> = Partial<Record<ChainId, T>>
+export type FullChainMap<T> = Record<ChainId, T>
+
+export type ChainMap<T> = Partial<FullChainMap<T>>
 
 export class Chain {
     constructor(
