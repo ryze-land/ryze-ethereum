@@ -1,7 +1,7 @@
-import { Chain } from '../classes'
-import { ChainId, ChainIds } from '../constants'
+import { Chain, FullChainMap } from '../classes'
+import { ChainIds } from '../constants'
 
-export const chainRegistry: Record<ChainId, Chain> = {
+export const chainRegistry: FullChainMap<Chain> = {
     // ETH
     [ChainIds.ETH]: new Chain(
         ChainIds.ETH,
