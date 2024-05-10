@@ -1,4 +1,4 @@
-import { AbstractProvider, JsonRpcSigner, PreparedTransactionRequest } from 'ethers'
+import { AbstractSigner, PreparedTransactionRequest, Provider } from 'ethers'
 
 export class Transaction {
     /**
@@ -9,7 +9,7 @@ export class Transaction {
      */
     public constructor(
         public readonly preparedTransactionRequest: PreparedTransactionRequest,
-        public readonly signer: JsonRpcSigner,
+        public readonly signer: AbstractSigner,
     ) {
     }
 
@@ -26,7 +26,7 @@ export class Transaction {
      */
     public static async initialize(
         preparedTransactionRequest: PreparedTransactionRequest,
-        signer: JsonRpcSigner,
+        signer: AbstractSigner,
         gasMultiplier: bigint,
     ): Promise<Transaction> {
         const from = await signer.getAddress()
@@ -34,13 +34,17 @@ export class Transaction {
             ...preparedTransactionRequest,
             from,
         }
+        const provider = signer.provider
+
+        if (!provider)
+            throw new Error(`Provider not found for signer: ${ from }`)
 
         return new Transaction(
             {
                 ...transactionWithSender,
                 gasLimit: await Transaction.estimateGas(
                     transactionWithSender,
-                    signer.provider,
+                    provider,
                     gasMultiplier,
                 ),
             },
@@ -60,7 +64,7 @@ export class Transaction {
      */
     public static async estimateGas(
         preparedTransactionRequest: PreparedTransactionRequest,
-        provider: AbstractProvider,
+        provider: Provider,
         gasMultiplier: bigint,
     ): Promise<bigint> {
         return (await provider.estimateGas(preparedTransactionRequest)) * gasMultiplier / 1_000n
