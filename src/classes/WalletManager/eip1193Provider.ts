@@ -1,4 +1,6 @@
-export interface EIP1193Provider {
+import { Eip1193Provider } from 'ethers'
+
+export interface EIP1193Provider extends Eip1193Provider {
     on(eventName: string | symbol, listener: (...args: any[]) => void): this
 
     addListener?(eventName: string | symbol, listener: (...args: any[]) => void): this
@@ -6,6 +8,4 @@ export interface EIP1193Provider {
     removeListener?(eventName: string | symbol, listener: (...args: any[]) => void): this
 
     removeAllListeners?(event?: string | symbol): this
-
-    request<T>(args: { method: string, params?: unknown[] | Record<string, unknown> }): Promise<T>
 }
