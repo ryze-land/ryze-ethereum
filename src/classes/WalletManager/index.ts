@@ -293,12 +293,12 @@ export class WalletManager {
      * @returns {Promise<string>} - Returns a promise that resolves to the current wallet address.
      */
     private async _getWalletAddress(): Promise<string> {
-        const accounts = await this.request({ method: 'eth_requestAccounts' })
+        const address = await (await this._wrappedProvider?.getSigner())?.getAddress()
 
-        if (!accounts.length)
+        if (!address)
             throw new Error(EthErrors.SIGNER_UNAVAILABLE)
 
-        return accounts[0].toLowerCase()
+        return address.toLowerCase()
     }
 
     /**
