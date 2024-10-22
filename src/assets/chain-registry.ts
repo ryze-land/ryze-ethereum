@@ -62,19 +62,21 @@ export const chainRegistry: FullChainMap<Chain> = {
             symbol: 'BNB',
         },
         'https://bscscan.com',
-        ['https://rpc.ankr.com/bsc'],
+        ['https://bsc-dataseed1.bnbchain.org'],
     ),
     [ChainIds.BNB_TESTNET]: new Chain(
         ChainIds.BNB_TESTNET,
         'BNB Smart Chain Testnet',
         true,
-
         {
             name: 'Binance Coin',
             symbol: 'BNB',
         },
         'https://testnet.bscscan.com',
-        ['https://rpc.ankr.com/bsc_testnet_chapel'],
+        [
+            'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
+            'https://data-seed-prebsc-2-s2.bnbchain.org:8545',
+        ],
     ),
 
     // POLYGON
@@ -87,7 +89,7 @@ export const chainRegistry: FullChainMap<Chain> = {
             symbol: 'MATIC',
         },
         'https://polygonscan.com',
-        ['https://rpc.ankr.com/polygon'],
+        ['https://polygon-rpc.com'],
     ),
     [ChainIds.POLYGON_TESTNET]: new Chain(
         ChainIds.POLYGON_TESTNET,
@@ -148,7 +150,7 @@ export const chainRegistry: FullChainMap<Chain> = {
             symbol: 'ETH',
         },
         'https://arbiscan.io',
-        ['https://rpc.ankr.com/arbitrum'],
+        ['https://arb1.arbitrum.io/rpc'],
     ),
     [ChainIds.ARBITRUM_TESTNET]: new Chain(
         ChainIds.ARBITRUM_TESTNET,
