@@ -4,7 +4,7 @@ import { icons } from '../../assets/icons/icons'
 import { ChainId, EthErrors } from '../../constants'
 import { numberToHex } from '../../helpers'
 import { EthersErrorCode } from '../../errors'
-import { WalletConnector } from './WalletConnector'
+import { WalletConnector__disconnect } from './WalletConnector__disconnect'
 
 type EthereumProviderOptions = Parameters<typeof WalletConnectProvider.init>[0];
 
@@ -43,7 +43,7 @@ type WalletConnectOptions = {
     relayUrl?: string
 }
 
-export class WalletConnectConnector extends WalletConnector {
+export class WalletConnectConnector extends WalletConnector__disconnect {
     public readonly id: string = 'walletConnect'
     public readonly name: string = 'Wallet Connect'
 

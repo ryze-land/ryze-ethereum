@@ -7,6 +7,7 @@ import { TrustWalletConnector } from './TrustWalletConnector'
 import { CoinbaseConnector } from './CoinbaseConnector'
 
 export * from './WalletConnector'
+export * from './WalletConnector__disconnect'
 export * from './BrowserConnector'
 export * from './WalletConnectConnector'
 

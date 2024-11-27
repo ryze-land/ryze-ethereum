@@ -4,7 +4,7 @@ import { EthersErrorCode, isEthersError, isProviderError, ProviderErrorCode } fr
 import { Chain } from '../Chain'
 import { LocalStorage } from '../LocalStorage'
 import { WalletInfo, walletInfoSchema } from '../WalletInfo'
-import { defaultWalletConnectors, WalletConnectConnector, type WalletConnector } from '../WalletConnectors'
+import { defaultWalletConnectors, WalletConnector__disconnect, type WalletConnector } from '../WalletConnectors'
 import { EIP1193Provider } from './eip1193Provider'
 
 export type OnWalletUpdate = (walletInfo: WalletInfo | null) => void | Promise<void>
@@ -179,7 +179,7 @@ export class WalletManager {
 
         const connector = this._connectors[this._currentWalletConnectorId]
 
-        connector instanceof WalletConnectConnector && await connector.disconnect()
+        connector instanceof WalletConnector__disconnect && await connector.disconnect()
     }
 
     /**
