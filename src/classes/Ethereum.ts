@@ -2,10 +2,11 @@ import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
 import { chainRegistry } from '../assets'
 import { allChainIds, ChainId } from '../constants'
 import { Chain, type ChainMap } from './Chain'
-import { MultiRpcProvider } from './MultiRpcProvider'
+import { MultiRpcProvider, getSingleRpcProvider } from './Providers'
 import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
 import { type WalletConnector } from './WalletConnectors'
+import { BatchLimiter } from './BatchLimiter'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
@@ -23,6 +24,7 @@ export class Ethereum {
      * @param chainToRpcMap - Optional mapping from ChainIds to RPC URLs.
      * @param onWalletUpdate - Optional callback to be invoked when the wallet updates.
      * @param batchMaxCount - Optional maximum number of requests to batch together.
+     * @param limiter - Optional BatchLimiter to be used when performing rpc requests.
      * @param gasMultiplier - Optional multiplier to be used when estimating the gas limit for transactions.
      *                        The value is represented in thousandths. A value of 1_000 denotes no multiplier
      *                        (i.e., actual gas limit), while a value of 2_000 means the gas limit is doubled.
@@ -35,6 +37,7 @@ export class Ethereum {
         chainToRpcMap,
         onWalletUpdate,
         batchMaxCount,
+        limiter,
         gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
@@ -43,6 +46,7 @@ export class Ethereum {
         chainToRpcMap?: ChainMap<string[]>
         onWalletUpdate?: OnWalletUpdate
         batchMaxCount?: number
+        limiter?: BatchLimiter
         gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
@@ -57,8 +61,8 @@ export class Ethereum {
                 const rpcs = chainToRpcMap?.[chainId] || chain.rpcList
 
                 return rpcs.length === 1
-                    ? new JsonRpcProvider(rpcs[0], undefined, { batchMaxCount })
-                    : new MultiRpcProvider(rpcs, { batchMaxCount })
+                    ? getSingleRpcProvider(rpcs[0], { batchMaxCount, limiter })
+                    : new MultiRpcProvider(rpcs, { batchMaxCount, limiter })
             },
         })
     }
