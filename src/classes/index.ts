@@ -1,6 +1,7 @@
 export * from './WalletInfo'
 export * from './WalletManager'
 export * from './WalletConnectors'
+export * from './BatchLimiter'
 export * from './BigNumber'
 export * from './Chain'
 export * from './CircularArray'
