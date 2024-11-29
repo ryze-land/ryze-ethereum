@@ -22,7 +22,7 @@ export class Ethereum {
      * @param connectors - Optional array of WalletConnectors to be used.
      * @param chainToRpcMap - Optional mapping from ChainIds to RPC URLs.
      * @param onWalletUpdate - Optional callback to be invoked when the wallet updates.
-     * @param batchMaxSize - Optional maximum number of requests to batch together.
+     * @param batchMaxCount - Optional maximum number of requests to batch together.
      * @param gasMultiplier - Optional multiplier to be used when estimating the gas limit for transactions.
      *                        The value is represented in thousandths. A value of 1_000 denotes no multiplier
      *                        (i.e., actual gas limit), while a value of 2_000 means the gas limit is doubled.
@@ -34,7 +34,7 @@ export class Ethereum {
         connectors,
         chainToRpcMap,
         onWalletUpdate,
-        batchMaxSize,
+        batchMaxCount,
         gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
@@ -42,7 +42,7 @@ export class Ethereum {
         connectors?: WalletConnector[],
         chainToRpcMap?: ChainMap<string[]>
         onWalletUpdate?: OnWalletUpdate
-        batchMaxSize?: number
+        batchMaxCount?: number
         gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
@@ -57,8 +57,8 @@ export class Ethereum {
                 const rpcs = chainToRpcMap?.[chainId] || chain.rpcList
 
                 return rpcs.length === 1
-                    ? new JsonRpcProvider(rpcs[0], undefined, { batchMaxSize })
-                    : new MultiRpcProvider(rpcs, { batchMaxSize })
+                    ? new JsonRpcProvider(rpcs[0], undefined, { batchMaxCount })
+                    : new MultiRpcProvider(rpcs, { batchMaxCount })
             },
         })
     }

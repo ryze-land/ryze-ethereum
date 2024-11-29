@@ -11,10 +11,10 @@ export class MultiRpcProvider implements ContractRunner {
 
     constructor(
         providers: string[],
-        { batchMaxSize }: { batchMaxSize?: number },
+        { batchMaxCount }: { batchMaxCount?: number },
     ) {
         this.providers = new CircularArray(
-            providers.map(provider => new JsonRpcProvider(provider, undefined, { batchMaxSize })),
+            providers.map(provider => new JsonRpcProvider(provider, undefined, { batchMaxCount })),
         )
     }
 
