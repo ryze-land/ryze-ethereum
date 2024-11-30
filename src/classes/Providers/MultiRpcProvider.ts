@@ -4,18 +4,18 @@ import {
     TransactionRequest,
     TransactionResponse,
 } from 'ethers'
-import { CircularArray } from './CircularArray'
+import { CircularArray } from '../CircularArray'
+import { BatchLimiter } from '../BatchLimiter'
+import { getSingleRpcProvider } from './get-rpc-provider'
 
 export class MultiRpcProvider implements ContractRunner {
     private providers: CircularArray<JsonRpcProvider>
 
     constructor(
         providers: string[],
-        { batchMaxCount }: { batchMaxCount?: number },
+        options: { batchMaxCount?: number, limiter?: BatchLimiter},
     ) {
-        this.providers = new CircularArray(
-            providers.map(provider => new JsonRpcProvider(provider, undefined, { batchMaxCount })),
-        )
+        this.providers = new CircularArray(providers.map(provider => getSingleRpcProvider(provider, options)))
     }
 
     public get provider(): JsonRpcProvider {
