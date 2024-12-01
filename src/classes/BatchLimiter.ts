@@ -1,7 +1,30 @@
+// Specifies if the limit should be shared among all chains or if each chain should have its own limit.
+export const BatchLimiterModes = {
+    // each chain gets its own limiter, meaning it won't interfere with other chains
+    PRIVATE_LIMITER: 'PRIVATE_LIMITER',
+    // shares the limit across all chains
+    SHARED_LIMITER: 'SHARED_LIMITER',
+} as const
+
+// Specifies if the limit should be shared among all chains or if each chain should have its own limit.
+export type BatchLimiterMode = typeof BatchLimiterModes[keyof typeof BatchLimiterModes]
+
+export type BatchLimiterOptions = {
+    requestsPerInterval: number
+    interval: number
+    mode?: BatchLimiterMode
+}
+
 export class BatchLimiter {
     private availableRequests: number // Amount of calls still available in the current interval
     private lastRefill: number // Timestamp of the last refill
 
+    /**
+     * Creates an instance of BatchLimiter.
+     *
+     * @param requestsPerInterval - The number of requests allowed per interval.
+     * @param interval - The duration of the interval in milliseconds.
+     */
     constructor(
         private readonly requestsPerInterval: number,
         private readonly interval: number,

@@ -6,7 +6,7 @@ import { MultiRpcProvider, getSingleRpcProvider } from './Providers'
 import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
 import { type WalletConnector } from './WalletConnectors'
-import { BatchLimiter } from './BatchLimiter'
+import { BatchLimiter, BatchLimiterModes, BatchLimiterOptions } from './BatchLimiter'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
@@ -37,7 +37,7 @@ export class Ethereum {
         chainToRpcMap,
         onWalletUpdate,
         batchMaxCount,
-        limiter,
+        limiterOptions,
         gasMultiplier = 2_000n,
     }: {
         defaultChainId: ChainId
@@ -46,7 +46,7 @@ export class Ethereum {
         chainToRpcMap?: ChainMap<string[]>
         onWalletUpdate?: OnWalletUpdate
         batchMaxCount?: number
-        limiter?: BatchLimiter
+        limiterOptions?: BatchLimiterOptions
         gasMultiplier?: bigint
     }) {
         this.defaultChainId = defaultChainId
@@ -54,11 +54,18 @@ export class Ethereum {
         this.walletManager = new WalletManager({ defaultChainId, connectors, onWalletUpdate })
         this.gasMultiplier = gasMultiplier
 
+        let limiter = limiterOptions?.mode === BatchLimiterModes.SHARED_LIMITER
+            ? new BatchLimiter(limiterOptions.requestsPerInterval, limiterOptions.interval)
+            : undefined
+
         this._providers = Chain.createChainMap({
             chainIds: allChainIds,
             initialValueCallback: (chainId: ChainId) => {
                 const chain = chainRegistry[chainId]
                 const rpcs = chainToRpcMap?.[chainId] || chain.rpcList
+
+                if (limiterOptions?.mode === BatchLimiterModes.PRIVATE_LIMITER)
+                    limiter = new BatchLimiter(limiterOptions.requestsPerInterval, limiterOptions.interval)
 
                 return rpcs.length === 1
                     ? getSingleRpcProvider(rpcs[0], { batchMaxCount, limiter })
