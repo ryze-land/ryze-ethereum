@@ -54,7 +54,7 @@ export class Ethereum {
         this.walletManager = new WalletManager({ defaultChainId, connectors, onWalletUpdate })
         this.gasMultiplier = gasMultiplier
 
-        let limiter = limiterOptions?.mode === BatchLimiterModes.SHARED_LIMITER
+        let limiter = limiterOptions && (limiterOptions.mode === BatchLimiterModes.SHARED_LIMITER || !limiterOptions.mode)
             ? new BatchLimiter(limiterOptions.requestsPerInterval, limiterOptions.interval)
             : undefined
 
