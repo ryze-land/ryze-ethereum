@@ -38,4 +38,13 @@ export class WalletInfo {
             this.connected,
         )
     }
+
+    public get JSON() {
+        return {
+            walletConnectorId: this.walletConnectorId,
+            chainId: this.chainId,
+            address: this.address,
+            connected: this.connected,
+        }
+    }
 }
