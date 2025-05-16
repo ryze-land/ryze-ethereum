@@ -148,6 +148,26 @@ export class WalletManager {
     }
 
     /**
+     * Updates walletInfo using localStorage data but without reconnecting to the wallet provider.
+     */
+    public softReconnect() {
+        if (this._walletInfo)
+            return
+
+        const walletInfo = this._storage.get()
+
+        if (!walletInfo)
+            return
+
+        this.walletInfo = new WalletInfo(
+            walletInfo.walletConnectorId,
+            walletInfo.chainId,
+            walletInfo.address,
+            false,
+        )
+    }
+
+    /**
      * Gets the current wallet information.
      *
      * This function returns an object containing the current address and chainId.
