@@ -292,6 +292,19 @@ export class WalletManager {
                 return onRequestAlreadyPending(e)
         }
 
+        if (isProviderError(e)) {
+            const actionRejected = ProviderErrorCode.USER_REJECTED_REQUEST
+
+            if (onReject && actionRejected) {
+                return onReject({
+                    name: 'Error',
+                    code: EthersErrorCode.ACTION_REJECTED,
+                    shortMessage: e.message,
+                    message: e.message,
+                })
+            }
+        }
+
         throw e
     }
 
