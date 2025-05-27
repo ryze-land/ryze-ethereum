@@ -22,19 +22,20 @@ export class Transaction {
      * @param gasMultiplier - A factor used to adjust the estimated gas limit for the transaction.
      *                        The value is represented in thousandths, where 1_000 means no adjustment
      *                        (i.e., actual estimated gas limit), and 2_000 doubles the gas limit.
+     * @param provider - Optional. Provider object used to estimate gas. If not provided, the signer's provider is used.
      * @returns - A promise that resolves to a new Transaction instance.
      */
     public static async initialize(
         preparedTransactionRequest: PreparedTransactionRequest,
         signer: AbstractSigner,
         gasMultiplier: bigint,
+        provider = signer.provider,
     ): Promise<Transaction> {
         const from = await signer.getAddress()
         const transactionWithSender = {
             ...preparedTransactionRequest,
             from,
         }
-        const provider = signer.provider
 
         if (!provider)
             throw new Error(`Provider not found for signer: ${ from }`)

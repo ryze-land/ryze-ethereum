@@ -1,12 +1,12 @@
-import { JsonRpcProvider, PreparedTransactionRequest } from 'ethers'
+import type { JsonRpcProvider, PreparedTransactionRequest, Provider } from 'ethers'
 import { chainRegistry } from '../assets'
 import { allChainIds, ChainId } from '../constants'
 import { Chain, type ChainMap } from './Chain'
 import { MultiRpcProvider, getSingleRpcProvider } from './Providers'
 import { Transaction } from './Transaction'
 import { OnWalletUpdate, WalletManager } from './WalletManager'
-import { type WalletConnector } from './WalletConnectors'
-import { BatchLimiter, BatchLimiterModes, BatchLimiterOptions } from './BatchLimiter'
+import type { WalletConnector } from './WalletConnectors'
+import { BatchLimiter, BatchLimiterModes, type BatchLimiterOptions } from './BatchLimiter'
 
 export class Ethereum {
     public readonly defaultChainId: ChainId
@@ -83,15 +83,18 @@ export class Ethereum {
      *                        The value is represented in thousandths, where 1_000 means no adjustment
      *                        (i.e., actual estimated gas limit), and 2_000 doubles the gas limit.
      *                        If not provided, the Ethereum instance's default gasMultiplier is used.
+     * @param provider - Optional. A specific provider to use for estimating gas.
      */
     public async initializeTransaction(
         preparedTransactionRequest: PreparedTransactionRequest,
         gasMultiplier?: bigint,
+        provider?: Provider,
     ): Promise<Transaction> {
         return Transaction.initialize(
             preparedTransactionRequest,
             await this.walletManager.getSigner(),
             gasMultiplier || this.gasMultiplier,
+            provider,
         )
     }
 
